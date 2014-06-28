@@ -39,6 +39,7 @@ impl GameWindowGLFW {
         window.set_key_polling(true);
         window.set_mouse_button_polling(true);
         window.set_cursor_pos_polling(true);
+        window.set_scroll_polling(true);
         // or polling all event
         //window.set_all_polling(true);
         window.make_current();
