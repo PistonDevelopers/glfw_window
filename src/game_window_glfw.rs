@@ -87,6 +87,10 @@ impl GameWindowGLFW {
                     self.event_queue.push_back(
                         event::MouseMoved(x, y, None));
                 },
+                glfw::ScrollEvent(x, y) => {
+                    self.event_queue.push_back(
+                        event::MouseScrolled(x, y));
+                },
                 _ => {},
             }
         }
