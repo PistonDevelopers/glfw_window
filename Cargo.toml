@@ -20,7 +20,7 @@ tags = []
 
 git = "https://github.com/PistonDevelopers/piston"
 
-[dependencies.glfw-rs]
+[dependencies.glfw]
 
 git = "https://github.com/bjz/glfw-rs"
 
