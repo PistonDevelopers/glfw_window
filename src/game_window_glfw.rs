@@ -113,6 +113,14 @@ impl GameWindow for GameWindowGLFW {
         self.window.swap_buffers();
     }
 
+    fn capture_cursor(&mut self, enabled: bool) {
+        if enabled {
+            self.window.set_cursor_mode(glfw::CursorDisabled)
+        } else {
+            self.window.set_cursor_mode(glfw::CursorNormal)
+        }
+    }
+
     fn poll_event(&mut self) -> event::Event {
         self.flush_messages();
 
