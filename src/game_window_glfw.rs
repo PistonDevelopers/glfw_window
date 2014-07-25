@@ -29,8 +29,13 @@ impl GameWindowGLFW {
     pub fn new(settings: GameWindowSettings) -> GameWindowGLFW {
         use glfw::Context;
 
-        // Create GLFW window.
+        // Initialize GLFW.
         let glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
+
+        // Make sure we have the right GL version.
+        glfw.window_hint(glfw::ContextVersion(3, 3));
+
+        // Create GLFW window.
         let (window, events) = glfw.create_window(
             settings.size[0],
             settings.size[1],
