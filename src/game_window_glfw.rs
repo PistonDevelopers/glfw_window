@@ -102,27 +102,27 @@ impl GameWindowGLFW {
                         self.window.set_should_close(true);
                     },
                 glfw::KeyEvent(key, _, glfw::Press, _) => {
-                    self.event_queue.push_back(
+                    self.event_queue.push(
                         event::KeyPressed(glfw_map_key(key)));
                 },
                 glfw::KeyEvent(key, _, glfw::Release, _) => {
-                    self.event_queue.push_back(
+                    self.event_queue.push(
                         event::KeyReleased(glfw_map_key(key)));
                 },
                 glfw::MouseButtonEvent(button, glfw::Press, _) => {
-                    self.event_queue.push_back(
+                    self.event_queue.push(
                         event::MouseButtonPressed(glfw_map_mouse(button)));
                 },
                 glfw::MouseButtonEvent(button, glfw::Release, _) => {
-                    self.event_queue.push_back(
+                    self.event_queue.push(
                         event::MouseButtonReleased(glfw_map_mouse(button)));
                 },
                 glfw::CursorPosEvent(x, y) => {
-                    self.event_queue.push_back(
+                    self.event_queue.push(
                         event::MouseMoved(x, y, None));
                 },
                 glfw::ScrollEvent(x, y) => {
-                    self.event_queue.push_back(
+                    self.event_queue.push(
                         event::MouseScrolled(x, y));
                 },
                 _ => {},
