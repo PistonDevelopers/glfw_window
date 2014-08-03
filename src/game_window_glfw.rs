@@ -4,6 +4,7 @@
 use collections::Deque;
 use collections::ringbuf::RingBuf;
 use glfw;
+use glfw::Context;
 use gl;
 use piston::event;
 use piston::keyboard;
@@ -14,17 +15,44 @@ use piston::GameWindowSettings;
 /// Contains stuff for game window.
 pub struct GameWindowGLFW {
     /// The window.
-    window: glfw::Window,
+    pub window: glfw::Window,
     /// Receives events from window.
     events: Receiver<(f64, glfw::WindowEvent)>,
     /// GLFW context.
-    glfw: glfw::Glfw,
+    pub glfw: glfw::Glfw,
     /// Game window settings.
     settings: GameWindowSettings,
     event_queue: RingBuf<event::Event>,
 }
 
 impl GameWindowGLFW {
+    /// Create a new game window from an existing GLFW window.
+    pub fn from_pieces(win: glfw::Window, glfw: glfw::Glfw,
+                       events: Receiver<(f64, glfw::WindowEvent)>,
+                       exit_on_esc: bool) -> GameWindowGLFW {
+        win.set_key_polling(true);
+        win.set_mouse_button_polling(true);
+        win.set_cursor_pos_polling(true);
+        win.set_scroll_polling(true);
+        win.make_current();
+
+        let (w, h) = win.get_framebuffer_size();
+        let fullscreen = win.with_window_mode(|m| match m { glfw::Windowed => true, _ => false });
+
+        GameWindowGLFW {
+            window: win,
+            events: events,
+            glfw: glfw,
+            settings: GameWindowSettings {
+                title: "<unknown window title, created with from_pieces>".to_string(),
+                size: [w as u32, h as u32],
+                fullscreen: fullscreen,
+                exit_on_esc: exit_on_esc,
+            },
+            event_queue: RingBuf::<event::Event>::new(),
+        }
+    }
+
     /// Creates a new game window for GLFW.
     pub fn new(settings: GameWindowSettings) -> GameWindowGLFW {
         use glfw::Context;
