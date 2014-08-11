@@ -140,6 +140,10 @@ impl GameWindow for GameWindowGLFW {
         self.window.should_close()
     }
 
+    fn close(&mut self) {
+        self.window.set_should_close(true);
+    }
+
     fn swap_buffers(&self) {
         use glfw::Context;
 
