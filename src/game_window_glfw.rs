@@ -8,11 +8,12 @@ use collections::ringbuf::RingBuf;
 use glfw;
 use glfw::Context;
 use gl;
-use piston::event;
+use piston::game_window;
 use piston::keyboard;
 use piston::mouse;
 use piston::GameWindow;
 use piston::GameWindowSettings;
+use piston::shader_version::opengl::OpenGL;
 
 /// Contains stuff for game window.
 pub struct GameWindowGLFW {
@@ -24,7 +25,7 @@ pub struct GameWindowGLFW {
     pub glfw: glfw::Glfw,
     /// Game window settings.
     settings: GameWindowSettings,
-    event_queue: RingBuf<event::Event>,
+    event_queue: RingBuf<game_window::Event>,
 }
 
 impl GameWindowGLFW {
@@ -51,19 +52,21 @@ impl GameWindowGLFW {
                 fullscreen: fullscreen,
                 exit_on_esc: exit_on_esc,
             },
-            event_queue: RingBuf::<event::Event>::new(),
+            event_queue: RingBuf::<game_window::Event>::new(),
         }
     }
 
     /// Creates a new game window for GLFW.
-    pub fn new(settings: GameWindowSettings) -> GameWindowGLFW {
+    pub fn new(opengl: OpenGL, settings: GameWindowSettings) -> GameWindowGLFW {
         use glfw::Context;
 
         // Initialize GLFW.
         let glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
 
+        let (major, minor) = opengl.get_major_minor();
+
         // Make sure we have the right GL version.
-        glfw.window_hint(glfw::ContextVersion(3, 2));
+        glfw.window_hint(glfw::ContextVersion(major as u32, minor as u32));
         glfw.window_hint(glfw::OpenglForwardCompat(true));
         glfw.window_hint(glfw::OpenglProfile(glfw::OpenGlCoreProfile));
 
@@ -89,7 +92,7 @@ impl GameWindowGLFW {
             events: events,
             glfw: glfw,
             settings: settings,
-            event_queue: RingBuf::<event::Event>::new(),
+            event_queue: RingBuf::<game_window::Event>::new(),
         }
     }
 
@@ -107,27 +110,27 @@ impl GameWindowGLFW {
                     },
                 glfw::KeyEvent(key, _, glfw::Press, _) => {
                     self.event_queue.push(
-                        event::KeyPressed(glfw_map_key(key)));
+                        game_window::KeyPressed(glfw_map_key(key)));
                 },
                 glfw::KeyEvent(key, _, glfw::Release, _) => {
                     self.event_queue.push(
-                        event::KeyReleased(glfw_map_key(key)));
+                        game_window::KeyReleased(glfw_map_key(key)));
                 },
                 glfw::MouseButtonEvent(button, glfw::Press, _) => {
                     self.event_queue.push(
-                        event::MouseButtonPressed(glfw_map_mouse(button)));
+                        game_window::MouseButtonPressed(glfw_map_mouse(button)));
                 },
                 glfw::MouseButtonEvent(button, glfw::Release, _) => {
                     self.event_queue.push(
-                        event::MouseButtonReleased(glfw_map_mouse(button)));
+                        game_window::MouseButtonReleased(glfw_map_mouse(button)));
                 },
                 glfw::CursorPosEvent(x, y) => {
                     self.event_queue.push(
-                        event::MouseMoved(x, y, None));
+                        game_window::MouseMoved(x, y, None));
                 },
                 glfw::ScrollEvent(x, y) => {
                     self.event_queue.push(
-                        event::MouseScrolled(x, y));
+                        game_window::MouseScrolled(x, y));
                 },
                 _ => {},
             }
@@ -177,13 +180,13 @@ impl GameWindow for GameWindowGLFW {
         }
     }
 
-    fn poll_event(&mut self) -> event::Event {
+    fn poll_event(&mut self) -> game_window::Event {
         self.flush_messages();
 
         if self.event_queue.len() != 0 {
             self.event_queue.pop_front().unwrap()
         } else {
-            event::NoEvent
+            game_window::NoEvent
         }
     }
 }
