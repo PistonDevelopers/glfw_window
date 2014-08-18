@@ -26,6 +26,8 @@ pub struct GameWindowGLFW {
     /// Game window settings.
     settings: GameWindowSettings,
     event_queue: RingBuf<game_window::Event>,
+    // Used to compute relative mouse movement.
+    last_mouse_pos: Option<(f64, f64)>,
 }
 
 impl GameWindowGLFW {
@@ -53,6 +55,7 @@ impl GameWindowGLFW {
                 exit_on_esc: exit_on_esc,
             },
             event_queue: RingBuf::<game_window::Event>::new(),
+            last_mouse_pos: None,
         }
     }
 
@@ -93,6 +96,7 @@ impl GameWindowGLFW {
             glfw: glfw,
             settings: settings,
             event_queue: RingBuf::<game_window::Event>::new(),
+            last_mouse_pos: None,
         }
     }
 
@@ -125,8 +129,13 @@ impl GameWindowGLFW {
                         game_window::MouseButtonReleased(glfw_map_mouse(button)));
                 },
                 glfw::CursorPosEvent(x, y) => {
+                    let relative_motion = match self.last_mouse_pos {
+                            Some((lx, ly)) => Some((x - lx, y - ly)),
+                            None => None,
+                        };
                     self.event_queue.push(
-                        game_window::MouseMoved(x, y, None));
+                        game_window::MouseMoved(x, y, relative_motion));
+                    self.last_mouse_pos = Some((x, y));
                 },
                 glfw::ScrollEvent(x, y) => {
                     self.event_queue.push(
@@ -176,7 +185,8 @@ impl GameWindow for GameWindowGLFW {
         if enabled {
             self.window.set_cursor_mode(glfw::CursorDisabled)
         } else {
-            self.window.set_cursor_mode(glfw::CursorNormal)
+            self.window.set_cursor_mode(glfw::CursorNormal);
+            self.last_mouse_pos = None;
         }
     }
 
