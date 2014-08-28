@@ -8,7 +8,7 @@ use collections::ringbuf::RingBuf;
 use glfw;
 use glfw::Context;
 use gl;
-use piston::game_window;
+use piston::input;
 use piston::input::keyboard;
 use piston::input::mouse;
 use piston::GameWindow;
@@ -25,7 +25,7 @@ pub struct GameWindowGLFW {
     pub glfw: glfw::Glfw,
     /// Game window settings.
     settings: GameWindowSettings,
-    event_queue: RingBuf<game_window::Event>,
+    event_queue: RingBuf<input::InputEvent>,
     // Used to compute relative mouse movement.
     last_mouse_pos: Option<(f64, f64)>,
 }
@@ -54,7 +54,7 @@ impl GameWindowGLFW {
                 fullscreen: fullscreen,
                 exit_on_esc: exit_on_esc,
             },
-            event_queue: RingBuf::<game_window::Event>::new(),
+            event_queue: RingBuf::new(),
             last_mouse_pos: None,
         }
     }
@@ -83,6 +83,7 @@ impl GameWindowGLFW {
         window.set_mouse_button_polling(true);
         window.set_cursor_pos_polling(true);
         window.set_scroll_polling(true);
+        window.set_char_polling(true);
         // or polling all event
         //window.set_all_polling(true);
         window.make_current();
@@ -95,7 +96,7 @@ impl GameWindowGLFW {
             events: events,
             glfw: glfw,
             settings: settings,
-            event_queue: RingBuf::<game_window::Event>::new(),
+            event_queue: RingBuf::new(),
             last_mouse_pos: None,
         }
     }
@@ -109,39 +110,48 @@ impl GameWindowGLFW {
         for (_, event) in glfw::flush_messages(&self.events) {
             match event {
                 glfw::KeyEvent(glfw::KeyEscape, _, glfw::Press, _)
-                    if self.settings.exit_on_esc => {
-                        self.window.set_should_close(true);
-                    },
+                if self.settings.exit_on_esc => {
+                    self.window.set_should_close(true);
+                }
+                glfw::CharEvent(ch) => {
+                    self.event_queue.push(input::Text(ch.to_string()));
+                }
                 glfw::KeyEvent(key, _, glfw::Press, _) => {
                     self.event_queue.push(
-                        game_window::KeyPressed(glfw_map_key(key)));
-                },
+                        input::Press(input::Keyboard(glfw_map_key(key)))
+                    );
+                }
                 glfw::KeyEvent(key, _, glfw::Release, _) => {
                     self.event_queue.push(
-                        game_window::KeyReleased(glfw_map_key(key)));
-                },
+                        input::Release(input::Keyboard(glfw_map_key(key)))
+                    );
+                }
                 glfw::MouseButtonEvent(button, glfw::Press, _) => {
                     self.event_queue.push(
-                        game_window::MouseButtonPressed(glfw_map_mouse(button)));
-                },
+                        input::Press(input::Mouse(glfw_map_mouse(button)))
+                    );
+                }
                 glfw::MouseButtonEvent(button, glfw::Release, _) => {
                     self.event_queue.push(
-                        game_window::MouseButtonReleased(glfw_map_mouse(button)));
-                },
+                        input::Release(input::Mouse(glfw_map_mouse(button)))
+                    );
+                }
                 glfw::CursorPosEvent(x, y) => {
-                    let relative_motion = match self.last_mouse_pos {
-                            Some((lx, ly)) => Some((x - lx, y - ly)),
-                            None => None,
-                        };
-                    self.event_queue.push(
-                        game_window::MouseMoved(x, y, relative_motion));
+                    self.event_queue.push(input::Move(input::MouseCursor(x, y)));
+                    match self.last_mouse_pos {
+                        Some((lx, ly)) => {
+                            self.event_queue.push(
+                                input::Move(input::MouseRelative(x - lx, y - ly))
+                            )
+                        }
+                        None => {}
+                    };
                     self.last_mouse_pos = Some((x, y));
-                },
+                }
                 glfw::ScrollEvent(x, y) => {
-                    self.event_queue.push(
-                        game_window::MouseScrolled(x, y));
-                },
-                _ => {},
+                    self.event_queue.push(input::Move(input::MouseScroll(x, y)));
+                }
+                _ => {}
             }
         }
     }
@@ -190,13 +200,13 @@ impl GameWindow for GameWindowGLFW {
         }
     }
 
-    fn poll_event(&mut self) -> game_window::Event {
+    fn poll_event(&mut self) -> Option<input::InputEvent> {
         self.flush_messages();
 
         if self.event_queue.len() != 0 {
-            self.event_queue.pop_front().unwrap()
+            self.event_queue.pop_front()
         } else {
-            game_window::NoEvent
+            None
         }
     }
 }
