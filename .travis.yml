@@ -12,7 +12,7 @@ install:
     - git clone https://github.com/glfw/glfw.git
     - cd glfw
     - git checkout 3.0.3
-    - cmake -DCMAKE_C_FLAGS=-fPIC -DGLFW_BUILD_EXAMPLES=OFF -DGLFWBUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF .
+    - cmake -DCMAKE_C_FLAGS=-fPIC -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF .
     - make
     - sudo make install
     - cd ..
