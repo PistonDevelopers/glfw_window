@@ -2,7 +2,6 @@
 
 // External crates.
 use gfx;
-use device;
 use collections::Deque;
 use collections::ringbuf::RingBuf;
 use glfw;
@@ -157,8 +156,8 @@ impl GameWindowGLFW {
     }
 
     /// Creates a gfx device and frame.
-    pub fn gfx(&self) -> (device::GlDevice, gfx::Frame) {
-        let device = device::GlDevice::new(|s|
+    pub fn gfx(&self) -> (gfx::GlDevice, gfx::Frame) {
+        let device = gfx::GlDevice::new(|s|
             self.glfw.get_proc_address(s)
         );
         let (w, h) = self.get_size();
