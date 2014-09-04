@@ -50,6 +50,7 @@ impl GameWindowGLFW {
             settings: GameWindowSettings {
                 title: "<unknown window title, created with from_pieces>".to_string(),
                 size: [w as u32, h as u32],
+                samples: 0, //unknown
                 fullscreen: fullscreen,
                 exit_on_esc: exit_on_esc,
             },
@@ -71,6 +72,7 @@ impl GameWindowGLFW {
         glfw.window_hint(glfw::ContextVersion(major as u32, minor as u32));
         glfw.window_hint(glfw::OpenglForwardCompat(true));
         glfw.window_hint(glfw::OpenglProfile(glfw::OpenGlCoreProfile));
+        glfw.window_hint(glfw::Samples(settings.samples as u32));
 
         // Create GLFW window.
         let (window, events) = glfw.create_window(
@@ -350,4 +352,3 @@ fn glfw_map_mouse(mouse_button: glfw::MouseButton) -> mouse::Button {
         glfw::MouseButton8 => mouse::Button8,
     }
 }
-
