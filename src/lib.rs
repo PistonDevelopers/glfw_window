@@ -9,7 +9,7 @@ extern crate glfw;
 extern crate collections;
 extern crate gl;
 
-pub use game_window_glfw::GameWindowGLFW;
+pub use window_glfw::WindowGLFW;
 
-mod game_window_glfw;
+mod window_glfw;
 
