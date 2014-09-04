@@ -8,14 +8,18 @@ use glfw;
 use glfw::Context;
 use gl;
 use piston::input;
-use piston::input::keyboard;
-use piston::input::mouse;
-use piston::GameWindow;
-use piston::GameWindowSettings;
+use piston::input::{
+    keyboard,
+    mouse,
+};
+use piston::{
+    Window,
+    WindowSettings,
+};
 use piston::shader_version::opengl::OpenGL;
 
 /// Contains stuff for game window.
-pub struct GameWindowGLFW {
+pub struct WindowGLFW {
     /// The window.
     pub window: glfw::Window,
     /// Receives events from window.
@@ -23,17 +27,17 @@ pub struct GameWindowGLFW {
     /// GLFW context.
     pub glfw: glfw::Glfw,
     /// Game window settings.
-    settings: GameWindowSettings,
+    settings: WindowSettings,
     event_queue: RingBuf<input::InputEvent>,
     // Used to compute relative mouse movement.
     last_mouse_pos: Option<(f64, f64)>,
 }
 
-impl GameWindowGLFW {
+impl WindowGLFW {
     /// Create a new game window from an existing GLFW window.
     pub fn from_pieces(win: glfw::Window, glfw: glfw::Glfw,
                        events: Receiver<(f64, glfw::WindowEvent)>,
-                       exit_on_esc: bool) -> GameWindowGLFW {
+                       exit_on_esc: bool) -> WindowGLFW {
         win.set_key_polling(true);
         win.set_mouse_button_polling(true);
         win.set_cursor_pos_polling(true);
@@ -43,11 +47,11 @@ impl GameWindowGLFW {
         let (w, h) = win.get_framebuffer_size();
         let fullscreen = win.with_window_mode(|m| match m { glfw::Windowed => true, _ => false });
 
-        GameWindowGLFW {
+        WindowGLFW {
             window: win,
             events: events,
             glfw: glfw,
-            settings: GameWindowSettings {
+            settings: WindowSettings {
                 title: "<unknown window title, created with from_pieces>".to_string(),
                 size: [w as u32, h as u32],
                 samples: 0, //unknown
@@ -60,7 +64,7 @@ impl GameWindowGLFW {
     }
 
     /// Creates a new game window for GLFW.
-    pub fn new(opengl: OpenGL, settings: GameWindowSettings) -> GameWindowGLFW {
+    pub fn new(opengl: OpenGL, settings: WindowSettings) -> WindowGLFW {
         use glfw::Context;
 
         // Initialize GLFW.
@@ -92,7 +96,7 @@ impl GameWindowGLFW {
         // Load the OpenGL function pointers
         gl::load_with(|s| glfw.get_proc_address(s));
 
-        GameWindowGLFW {
+        WindowGLFW {
             window: window,
             events: events,
             glfw: glfw,
@@ -168,8 +172,8 @@ impl GameWindowGLFW {
     }
 }
 
-impl GameWindow for GameWindowGLFW {
-    fn get_settings<'a>(&'a self) -> &'a GameWindowSettings {
+impl Window for WindowGLFW {
+    fn get_settings<'a>(&'a self) -> &'a WindowSettings {
         &self.settings
     }
 
