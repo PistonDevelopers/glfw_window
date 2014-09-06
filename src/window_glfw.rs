@@ -38,10 +38,7 @@ impl WindowGLFW {
     pub fn from_pieces(win: glfw::Window, glfw: glfw::Glfw,
                        events: Receiver<(f64, glfw::WindowEvent)>,
                        exit_on_esc: bool) -> WindowGLFW {
-        win.set_key_polling(true);
-        win.set_mouse_button_polling(true);
-        win.set_cursor_pos_polling(true);
-        win.set_scroll_polling(true);
+        win.set_all_polling(true);
         win.make_current();
 
         let (w, h) = win.get_framebuffer_size();
@@ -84,13 +81,7 @@ impl WindowGLFW {
             settings.size[1],
             settings.title.as_slice(), glfw::Windowed
         ).expect("Failed to create GLFW window.");
-        window.set_key_polling(true);
-        window.set_mouse_button_polling(true);
-        window.set_cursor_pos_polling(true);
-        window.set_scroll_polling(true);
-        window.set_char_polling(true);
-        // or polling all event
-        //window.set_all_polling(true);
+        window.set_all_polling(true);
         window.make_current();
 
         // Load the OpenGL function pointers
@@ -155,6 +146,9 @@ impl WindowGLFW {
                 }
                 glfw::ScrollEvent(x, y) => {
                     self.event_queue.push(input::Move(input::MouseScroll(x, y)));
+                }
+                glfw::SizeEvent(w, h) => {
+                    self.event_queue.push(input::Resize(w as u32, h as u32));
                 }
                 _ => {}
             }
