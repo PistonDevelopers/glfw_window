@@ -150,6 +150,9 @@ impl WindowGLFW {
                 glfw::SizeEvent(w, h) => {
                     self.event_queue.push(input::Resize(w as u32, h as u32));
                 }
+                glfw::FocusEvent(focus) => {
+                    self.event_queue.push(input::Focus(focus));
+                }
                 _ => {}
             }
         }
