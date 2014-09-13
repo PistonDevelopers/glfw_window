@@ -7,16 +7,16 @@ use collections::ringbuf::RingBuf;
 use glfw;
 use glfw::Context;
 use gl;
-use piston::input;
-use piston::input::{
+use input;
+use input::{
     keyboard,
     mouse,
 };
-use piston::{
+use event::{
     Window,
     WindowSettings,
 };
-use piston::shader_version::opengl::OpenGL;
+use shader_version::opengl::OpenGL;
 
 /// Contains stuff for game window.
 pub struct WindowGLFW {
@@ -85,7 +85,7 @@ impl WindowGLFW {
         window.make_current();
 
         // Load the OpenGL function pointers
-        gl::load_with(|s| glfw.get_proc_address(s));
+        gl::load_with(|s| window.get_proc_address(s));
 
         WindowGLFW {
             window: window,
@@ -161,7 +161,7 @@ impl WindowGLFW {
     /// Creates a gfx device and frame.
     pub fn gfx(&self) -> (gfx::GlDevice, gfx::Frame) {
         let device = gfx::GlDevice::new(|s|
-            self.glfw.get_proc_address(s)
+            self.window.get_proc_address(s)
         );
         let (w, h) = self.get_size();
         let frame = gfx::Frame::new(w as u16, h as u16);
