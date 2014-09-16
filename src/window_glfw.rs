@@ -1,7 +1,6 @@
 //! Create window.
 
 // External crates.
-use gfx;
 use collections::Deque;
 use collections::ringbuf::RingBuf;
 use glfw;
@@ -156,16 +155,6 @@ impl WindowGLFW {
                 _ => {}
             }
         }
-    }
-
-    /// Creates a gfx device and frame.
-    pub fn gfx(&self) -> (gfx::GlDevice, gfx::Frame) {
-        let device = gfx::GlDevice::new(|s|
-            self.window.get_proc_address(s)
-        );
-        let (w, h) = self.get_size();
-        let frame = gfx::Frame::new(w as u16, h as u16);
-        (device, frame)
     }
 }
 
