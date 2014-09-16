@@ -3,7 +3,6 @@
 
 //! A GLFW window back-end for the Piston game engine.
 
-extern crate gfx;
 extern crate glfw;
 extern crate collections;
 extern crate gl;
