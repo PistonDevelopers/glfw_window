@@ -27,6 +27,6 @@ After you have created a window, do the following:
 let mut device = gfx::GlDevice::new(|s|
     self.window.get_proc_address(s)
 );
-let (w, h) = self.get_size();
+let (w, h) = window.get_size();
 let frame = gfx::Frame::new(w as u16, h as u16);
 ```
