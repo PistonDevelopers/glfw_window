@@ -17,7 +17,7 @@ tags = []
 
 [dependencies.event]
 
-git = "https://github.com/PistonDevelopers/rust-event"
+git = "https://github.com/PistonDevelopers/event"
 
 [dependencies.shader_version]
 
