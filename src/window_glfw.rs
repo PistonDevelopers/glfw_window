@@ -168,6 +168,11 @@ impl Window for WindowGLFW {
         (w as u32, h as u32)
     }
 
+    fn get_size(&self) -> (u32, u32) {
+        let (w, h) = self.window.get_size();
+        (w as u32, h as u32)
+    }
+
     fn should_close(&self) -> bool {
         self.window.should_close()
     }
