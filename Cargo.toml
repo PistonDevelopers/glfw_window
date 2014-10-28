@@ -1,6 +1,6 @@
 [package]
 
-name = "glfw_game_window"
+name = "glfw_window"
 version = "0.0.0"
 authors = [
     "bvssvni <bvssvni@gmail.com>",
@@ -37,6 +37,6 @@ git = "https://github.com/bjz/gl-rs"
 
 [lib]
 
-name = "glfw_game_window"
+name = "glfw_window"
 path = "src/lib.rs"
 

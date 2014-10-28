@@ -1,4 +1,3 @@
-#![crate_name = "glfw_game_window"]
 #![deny(missing_doc)]
 
 //! A GLFW window back-end for the Piston game engine.
