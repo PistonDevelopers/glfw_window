@@ -30,3 +30,7 @@ let mut device = gfx::GlDevice::new(|s|
 let (w, h) = window.get_size();
 let frame = gfx::Frame::new(w as u16, h as u16);
 ```
+
+### Troubleshooting
+
+* OSX: https://github.com/PistonDevelopers/rust-empty/issues/48
