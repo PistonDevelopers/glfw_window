@@ -1,0 +1,24 @@
+digraph example3 {
+    N0[label="glfw_window"];
+    N1[label="glfw-sys"];
+    N2[label="semver"];
+    N3[label="shader_version"];
+    N4[label="input"];
+    N5[label="event"];
+    N6[label="rust-xml"];
+    N7[label="gl_generator"];
+    N8[label="khronos_api"];
+    N9[label="gl"];
+    N10[label="glfw"];
+    N5 -> N4[label=""];
+    N7 -> N6[label=""];
+    N7 -> N8[label=""];
+    N9 -> N7[label=""];
+    N10 -> N2[label=""];
+    N10 -> N1[label=""];
+    N0 -> N10[label=""];
+    N0 -> N5[label=""];
+    N0 -> N4[label=""];
+    N0 -> N9[label=""];
+    N0 -> N3[label=""];
+}
