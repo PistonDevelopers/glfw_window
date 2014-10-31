@@ -1,4 +1,4 @@
-# glfw_window [![Build Status](https://travis-ci.org/PistonDevelopers/glfw_game_window.svg)](https://travis-ci.org/PistonDevelopers/glfw_game_window)
+# glfw_window [![Build Status](https://travis-ci.org/PistonDevelopers/glfw_window.svg?branch=master)](https://travis-ci.org/PistonDevelopers/glfw_window)
 
 A GLFW window back-end for the Piston game engine.
 
