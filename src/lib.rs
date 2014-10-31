@@ -1,4 +1,4 @@
-#![deny(missing_doc)]
+#![deny(missing_docs)]
 
 //! A GLFW window back-end for the Piston game engine.
 
