@@ -10,8 +10,7 @@ extern crate shader_version;
 extern crate input;
 
 // External crates.
-use collections::Deque;
-use collections::ringbuf::RingBuf;
+use collections::RingBuf;
 use glfw::Context;
 use input::{
     keyboard,
