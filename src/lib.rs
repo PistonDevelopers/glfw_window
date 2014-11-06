@@ -15,10 +15,15 @@ use glfw::Context;
 use input::{
     keyboard,
     mouse,
+    InputEvent,
 };
 use event::{
     Window,
     WindowSettings,
+};
+use event::window::{
+    PollEvent,
+    SwapBuffers,
 };
 use shader_version::opengl::OpenGL;
 
@@ -163,6 +168,26 @@ impl GlfwWindow {
     }
 }
 
+impl PollEvent<InputEvent> for GlfwWindow {
+    fn poll_event(&mut self) -> Option<input::InputEvent> {
+        self.flush_messages();
+
+        if self.event_queue.len() != 0 {
+            self.event_queue.pop_front()
+        } else {
+            None
+        }
+    }
+}
+
+impl SwapBuffers for GlfwWindow {
+    fn swap_buffers(&mut self) {
+        use glfw::Context;
+
+        self.window.swap_buffers();
+    }
+}
+
 impl Window for GlfwWindow {
     fn get_settings<'a>(&'a self) -> &'a WindowSettings {
         &self.settings
@@ -186,28 +211,12 @@ impl Window for GlfwWindow {
         self.window.set_should_close(true);
     }
 
-    fn swap_buffers(&self) {
-        use glfw::Context;
-
-        self.window.swap_buffers();
-    }
-
     fn capture_cursor(&mut self, enabled: bool) {
         if enabled {
             self.window.set_cursor_mode(glfw::CursorDisabled)
         } else {
             self.window.set_cursor_mode(glfw::CursorNormal);
             self.last_mouse_pos = None;
-        }
-    }
-
-    fn poll_event(&mut self) -> Option<input::InputEvent> {
-        self.flush_messages();
-
-        if self.event_queue.len() != 0 {
-            self.event_queue.pop_front()
-        } else {
-            None
         }
     }
 }
