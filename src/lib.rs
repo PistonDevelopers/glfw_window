@@ -8,8 +8,10 @@ extern crate gl;
 extern crate event;
 extern crate shader_version;
 extern crate input;
+extern crate current;
 
 // External crates.
+use current::{ Get };
 use collections::RingBuf;
 use glfw::Context;
 use input::{
@@ -20,6 +22,10 @@ use input::{
 use event::{
     Window,
     WindowSettings,
+};
+use event::window::{
+    ShouldClose,
+    Size,
 };
 use event::window::{
     PollEvent,
@@ -119,33 +125,33 @@ impl GlfwWindow {
                     self.window.set_should_close(true);
                 }
                 glfw::CharEvent(ch) => {
-                    self.event_queue.push(input::Text(ch.to_string()));
+                    self.event_queue.push_back(input::Text(ch.to_string()));
                 }
                 glfw::KeyEvent(key, _, glfw::Press, _) => {
-                    self.event_queue.push(
+                    self.event_queue.push_back(
                         input::Press(input::Keyboard(glfw_map_key(key)))
                     );
                 }
                 glfw::KeyEvent(key, _, glfw::Release, _) => {
-                    self.event_queue.push(
+                    self.event_queue.push_back(
                         input::Release(input::Keyboard(glfw_map_key(key)))
                     );
                 }
                 glfw::MouseButtonEvent(button, glfw::Press, _) => {
-                    self.event_queue.push(
+                    self.event_queue.push_back(
                         input::Press(input::Mouse(glfw_map_mouse(button)))
                     );
                 }
                 glfw::MouseButtonEvent(button, glfw::Release, _) => {
-                    self.event_queue.push(
+                    self.event_queue.push_back(
                         input::Release(input::Mouse(glfw_map_mouse(button)))
                     );
                 }
                 glfw::CursorPosEvent(x, y) => {
-                    self.event_queue.push(input::Move(input::MouseCursor(x, y)));
+                    self.event_queue.push_back(input::Move(input::MouseCursor(x, y)));
                     match self.last_mouse_pos {
                         Some((lx, ly)) => {
-                            self.event_queue.push(
+                            self.event_queue.push_back(
                                 input::Move(input::MouseRelative(x - lx, y - ly))
                             )
                         }
@@ -154,17 +160,30 @@ impl GlfwWindow {
                     self.last_mouse_pos = Some((x, y));
                 }
                 glfw::ScrollEvent(x, y) => {
-                    self.event_queue.push(input::Move(input::MouseScroll(x, y)));
+                    self.event_queue.push_back(input::Move(input::MouseScroll(x, y)));
                 }
                 glfw::SizeEvent(w, h) => {
-                    self.event_queue.push(input::Resize(w as u32, h as u32));
+                    self.event_queue.push_back(input::Resize(w as u32, h as u32));
                 }
                 glfw::FocusEvent(focus) => {
-                    self.event_queue.push(input::Focus(focus));
+                    self.event_queue.push_back(input::Focus(focus));
                 }
                 _ => {}
             }
         }
+    }
+}
+
+impl Get<Size> for GlfwWindow {
+    fn get(&self) -> Size {
+        let (w, h) = self.window.get_size();
+        Size([w as u32, h as u32])
+    }
+}
+
+impl Get<ShouldClose> for GlfwWindow {
+    fn get(&self) -> ShouldClose {
+        ShouldClose(self.window.should_close())
     }
 }
 
@@ -196,15 +215,6 @@ impl Window for GlfwWindow {
     fn get_draw_size(&self) -> (u32, u32) {
         let (w, h) = self.window.get_framebuffer_size();
         (w as u32, h as u32)
-    }
-
-    fn get_size(&self) -> (u32, u32) {
-        let (w, h) = self.window.get_size();
-        (w as u32, h as u32)
-    }
-
-    fn should_close(&self) -> bool {
-        self.window.should_close()
     }
 
     fn close(&mut self) {
