@@ -23,11 +23,14 @@ use event::{
     Window,
     WindowSettings,
 };
-use event::window::{ ShouldClose, SetShouldClose, Size };
-use event::window::{ PollEvent, SwapBuffers };
-use event::window::{ CaptureCursor, SetCaptureCursor };
-use event::window::{ DrawSize };
-use event::window::{ Title, SetTitle };
+use event::window::{
+    ShouldClose, SetShouldClose, Size,
+    PollEvent, SwapBuffers,
+    CaptureCursor, SetCaptureCursor,
+    DrawSize,
+    Title, SetTitle,
+    ExitOnEsc, SetExitOnEsc,
+};
 use shader_version::opengl::OpenGL;
 
 /// Contains stuff for game window.
@@ -251,6 +254,25 @@ impl Modifier<GlfwWindow> for Title {
 
 impl SetTitle for GlfwWindow {
     fn set_title(&mut self, val: Title) {
+        self.set_mut(val);
+    }
+}
+
+impl Get<ExitOnEsc> for GlfwWindow {
+    fn get(&self) -> ExitOnEsc {
+        ExitOnEsc(self.exit_on_esc)
+    }
+}
+
+impl Modifier<GlfwWindow> for ExitOnEsc {
+    fn modify(self, window: &mut GlfwWindow) {
+        let ExitOnEsc(val) = self;
+        window.exit_on_esc = val;
+    }
+}
+
+impl SetExitOnEsc for GlfwWindow {
+    fn set_exit_on_esc(&mut self, val: ExitOnEsc) {
         self.set_mut(val);
     }
 }
