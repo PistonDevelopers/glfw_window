@@ -38,13 +38,12 @@ pub struct GlfwWindow {
     events: Receiver<(f64, glfw::WindowEvent)>,
     /// GLFW context.
     pub glfw: glfw::Glfw,
-    /// Game window settings.
-    settings: WindowSettings,
     event_queue: RingBuf<input::InputEvent>,
     // Used to compute relative mouse movement.
     last_mouse_pos: Option<(f64, f64)>,
     // The back-end does not remember the title.
     title: String,
+    exit_on_esc: bool,
 }
 
 impl GlfwWindow {
@@ -54,22 +53,12 @@ impl GlfwWindow {
                        exit_on_esc: bool) -> GlfwWindow {
         win.set_all_polling(true);
         win.make_current();
-
-        let (w, h) = win.get_framebuffer_size();
-        let fullscreen = win.with_window_mode(|m| match m { glfw::Windowed => true, _ => false });
-
         let title = "<unknown window title, created from_pieces>";
         GlfwWindow {
             window: win,
             events: events,
             glfw: glfw,
-            settings: WindowSettings {
-                title: title.to_string(),
-                size: [w as u32, h as u32],
-                samples: 0, //unknown
-                fullscreen: fullscreen,
-                exit_on_esc: exit_on_esc,
-            },
+            exit_on_esc: exit_on_esc,
             event_queue: RingBuf::new(),
             last_mouse_pos: None,
             title: title.to_string(),
@@ -103,15 +92,14 @@ impl GlfwWindow {
         // Load the OpenGL function pointers
         gl::load_with(|s| window.get_proc_address(s));
 
-        let title = settings.title.clone();
         GlfwWindow {
             window: window,
             events: events,
             glfw: glfw,
-            settings: settings,
             event_queue: RingBuf::new(),
             last_mouse_pos: None,
-            title: title,
+            title: settings.title,
+            exit_on_esc: settings.exit_on_esc,
         }
     }
 
@@ -124,7 +112,7 @@ impl GlfwWindow {
         for (_, event) in glfw::flush_messages(&self.events) {
             match event {
                 glfw::KeyEvent(glfw::KeyEscape, _, glfw::Press, _)
-                if self.settings.exit_on_esc => {
+                if self.exit_on_esc => {
                     self.window.set_should_close(true);
                 }
                 glfw::CharEvent(ch) => {
@@ -267,11 +255,7 @@ impl SetTitle for GlfwWindow {
     }
 }
 
-impl Window for GlfwWindow {
-    fn get_settings<'a>(&'a self) -> &'a WindowSettings {
-        &self.settings
-    }
-}
+impl Window for GlfwWindow {}
 
 fn glfw_map_key(keycode: glfw::Key) -> keyboard::Key {
     match keycode {
