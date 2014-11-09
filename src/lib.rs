@@ -11,7 +11,7 @@ extern crate input;
 extern crate current;
 
 // External crates.
-use current::{ Get };
+use current::{ Get, Modifier, Set };
 use collections::RingBuf;
 use glfw::Context;
 use input::{
@@ -23,14 +23,9 @@ use event::{
     Window,
     WindowSettings,
 };
-use event::window::{
-    ShouldClose,
-    Size,
-};
-use event::window::{
-    PollEvent,
-    SwapBuffers,
-};
+use event::window::{ ShouldClose, Size };
+use event::window::{ PollEvent, SwapBuffers };
+use event::window::{ CaptureCursor, SetCaptureCursor };
 use shader_version::opengl::OpenGL;
 
 /// Contains stuff for game window.
@@ -207,6 +202,24 @@ impl SwapBuffers for GlfwWindow {
     }
 }
 
+impl Modifier<GlfwWindow> for CaptureCursor {
+    fn modify(self, window: &mut GlfwWindow) {
+        let CaptureCursor(enabled) = self;
+        if enabled {
+            window.window.set_cursor_mode(glfw::CursorDisabled)
+        } else {
+            window.window.set_cursor_mode(glfw::CursorNormal);
+            window.last_mouse_pos = None;
+        }
+    }
+}
+
+impl SetCaptureCursor for GlfwWindow {
+    fn set_capture_cursor(&mut self, val: CaptureCursor) {
+        self.set_mut(val);
+    }
+}
+
 impl Window for GlfwWindow {
     fn get_settings<'a>(&'a self) -> &'a WindowSettings {
         &self.settings
@@ -219,15 +232,6 @@ impl Window for GlfwWindow {
 
     fn close(&mut self) {
         self.window.set_should_close(true);
-    }
-
-    fn capture_cursor(&mut self, enabled: bool) {
-        if enabled {
-            self.window.set_cursor_mode(glfw::CursorDisabled)
-        } else {
-            self.window.set_cursor_mode(glfw::CursorNormal);
-            self.last_mouse_pos = None;
-        }
     }
 }
 
