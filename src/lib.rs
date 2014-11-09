@@ -23,7 +23,7 @@ use event::{
     Window,
     WindowSettings,
 };
-use event::window::{ ShouldClose, Size };
+use event::window::{ ShouldClose, SetShouldClose, Size };
 use event::window::{ PollEvent, SwapBuffers };
 use event::window::{ CaptureCursor, SetCaptureCursor };
 use shader_version::opengl::OpenGL;
@@ -220,6 +220,19 @@ impl SetCaptureCursor for GlfwWindow {
     }
 }
 
+impl Modifier<GlfwWindow> for ShouldClose {
+    fn modify(self, window: &mut GlfwWindow) {
+        let ShouldClose(val) = self;
+        window.window.set_should_close(val);
+    }
+}
+
+impl SetShouldClose for GlfwWindow {
+    fn set_should_close(&mut self, val: ShouldClose) {
+        self.set_mut(val);
+    }
+}
+
 impl Window for GlfwWindow {
     fn get_settings<'a>(&'a self) -> &'a WindowSettings {
         &self.settings
@@ -228,10 +241,6 @@ impl Window for GlfwWindow {
     fn get_draw_size(&self) -> (u32, u32) {
         let (w, h) = self.window.get_framebuffer_size();
         (w as u32, h as u32)
-    }
-
-    fn close(&mut self) {
-        self.window.set_should_close(true);
     }
 }
 
