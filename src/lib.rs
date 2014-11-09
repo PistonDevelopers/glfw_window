@@ -26,6 +26,7 @@ use event::{
 use event::window::{ ShouldClose, SetShouldClose, Size };
 use event::window::{ PollEvent, SwapBuffers };
 use event::window::{ CaptureCursor, SetCaptureCursor };
+use event::window::{ DrawSize };
 use shader_version::opengl::OpenGL;
 
 /// Contains stuff for game window.
@@ -233,14 +234,16 @@ impl SetShouldClose for GlfwWindow {
     }
 }
 
+impl Get<DrawSize> for GlfwWindow {
+    fn get(&self) -> DrawSize {
+        let (w, h) = self.window.get_framebuffer_size();
+        DrawSize([w as u32, h as u32])
+    }
+}
+
 impl Window for GlfwWindow {
     fn get_settings<'a>(&'a self) -> &'a WindowSettings {
         &self.settings
-    }
-
-    fn get_draw_size(&self) -> (u32, u32) {
-        let (w, h) = self.window.get_framebuffer_size();
-        (w as u32, h as u32)
     }
 }
 
