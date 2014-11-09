@@ -27,6 +27,7 @@ use event::window::{ ShouldClose, SetShouldClose, Size };
 use event::window::{ PollEvent, SwapBuffers };
 use event::window::{ CaptureCursor, SetCaptureCursor };
 use event::window::{ DrawSize };
+use event::window::{ Title, SetTitle };
 use shader_version::opengl::OpenGL;
 
 /// Contains stuff for game window.
@@ -42,6 +43,8 @@ pub struct GlfwWindow {
     event_queue: RingBuf<input::InputEvent>,
     // Used to compute relative mouse movement.
     last_mouse_pos: Option<(f64, f64)>,
+    // The back-end does not remember the title.
+    title: String,
 }
 
 impl GlfwWindow {
@@ -55,12 +58,13 @@ impl GlfwWindow {
         let (w, h) = win.get_framebuffer_size();
         let fullscreen = win.with_window_mode(|m| match m { glfw::Windowed => true, _ => false });
 
+        let title = "<unknown window title, created from_pieces>";
         GlfwWindow {
             window: win,
             events: events,
             glfw: glfw,
             settings: WindowSettings {
-                title: "<unknown window title, created with from_pieces>".to_string(),
+                title: title.to_string(),
                 size: [w as u32, h as u32],
                 samples: 0, //unknown
                 fullscreen: fullscreen,
@@ -68,6 +72,7 @@ impl GlfwWindow {
             },
             event_queue: RingBuf::new(),
             last_mouse_pos: None,
+            title: title.to_string(),
         }
     }
 
@@ -98,6 +103,7 @@ impl GlfwWindow {
         // Load the OpenGL function pointers
         gl::load_with(|s| window.get_proc_address(s));
 
+        let title = settings.title.clone();
         GlfwWindow {
             window: window,
             events: events,
@@ -105,6 +111,7 @@ impl GlfwWindow {
             settings: settings,
             event_queue: RingBuf::new(),
             last_mouse_pos: None,
+            title: title,
         }
     }
 
@@ -238,6 +245,25 @@ impl Get<DrawSize> for GlfwWindow {
     fn get(&self) -> DrawSize {
         let (w, h) = self.window.get_framebuffer_size();
         DrawSize([w as u32, h as u32])
+    }
+}
+
+impl Get<Title> for GlfwWindow {
+    fn get(&self) -> Title {
+        Title(self.title.clone())
+    }
+}
+
+impl Modifier<GlfwWindow> for Title {
+    fn modify(self, window: &mut GlfwWindow) {
+        let Title(val) = self;
+        window.window.set_title(val.as_slice())
+    }
+}
+
+impl SetTitle for GlfwWindow {
+    fn set_title(&mut self, val: Title) {
+        self.set_mut(val);
     }
 }
 
