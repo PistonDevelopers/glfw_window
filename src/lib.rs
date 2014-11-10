@@ -11,7 +11,7 @@ extern crate input;
 extern crate current;
 
 // External crates.
-use current::{ Get, Modifier, Set };
+use current::{ Get, Modifier };
 use collections::RingBuf;
 use glfw::Context;
 use input::{
@@ -24,12 +24,9 @@ use event::{
     WindowSettings,
 };
 use event::window::{
-    ShouldClose, SetShouldClose, Size,
-    PollEvent, SwapBuffers,
-    CaptureCursor, SetCaptureCursor,
-    DrawSize,
-    Title, SetTitle,
-    ExitOnEsc, SetExitOnEsc,
+    ShouldClose, Size, PollEvent, SwapBuffers,
+    CaptureCursor, DrawSize, Title, SetTitle,
+    ExitOnEsc
 };
 use shader_version::opengl::OpenGL;
 
@@ -213,22 +210,10 @@ impl Modifier<GlfwWindow> for CaptureCursor {
     }
 }
 
-impl SetCaptureCursor for GlfwWindow {
-    fn set_capture_cursor(&mut self, val: CaptureCursor) {
-        self.set_mut(val);
-    }
-}
-
 impl Modifier<GlfwWindow> for ShouldClose {
     fn modify(self, window: &mut GlfwWindow) {
         let ShouldClose(val) = self;
         window.window.set_should_close(val);
-    }
-}
-
-impl SetShouldClose for GlfwWindow {
-    fn set_should_close(&mut self, val: ShouldClose) {
-        self.set_mut(val);
     }
 }
 
@@ -252,12 +237,6 @@ impl Modifier<GlfwWindow> for Title {
     }
 }
 
-impl SetTitle for GlfwWindow {
-    fn set_title(&mut self, val: Title) {
-        self.set_mut(val);
-    }
-}
-
 impl Get<ExitOnEsc> for GlfwWindow {
     fn get(&self) -> ExitOnEsc {
         ExitOnEsc(self.exit_on_esc)
@@ -268,12 +247,6 @@ impl Modifier<GlfwWindow> for ExitOnEsc {
     fn modify(self, window: &mut GlfwWindow) {
         let ExitOnEsc(val) = self;
         window.exit_on_esc = val;
-    }
-}
-
-impl SetExitOnEsc for GlfwWindow {
-    fn set_exit_on_esc(&mut self, val: ExitOnEsc) {
-        self.set_mut(val);
     }
 }
 
