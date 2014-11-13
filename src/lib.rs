@@ -5,7 +5,7 @@
 extern crate glfw;
 extern crate collections;
 extern crate gl;
-extern crate event;
+extern crate window;
 extern crate shader_version;
 extern crate input;
 extern crate current;
@@ -19,11 +19,9 @@ use input::{
     mouse,
     InputEvent,
 };
-use event::{
+use window::{
     Window,
     WindowSettings,
-};
-use event::window::{
     ShouldClose, Size, PollEvent, SwapBuffers,
     CaptureCursor, DrawSize, Title, SetTitle,
     ExitOnEsc

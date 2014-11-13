@@ -15,9 +15,9 @@ authors = [
     "TyOverby <ty@pre-alpha.com>"]
 tags = []
 
-[dependencies.event]
+[dependencies.window]
 
-git = "https://github.com/PistonDevelopers/event"
+git = "https://github.com/PistonDevelopers/window"
 
 [dependencies.shader_version]
 
