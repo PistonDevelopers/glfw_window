@@ -44,6 +44,13 @@ pub struct GlfwWindow {
     exit_on_esc: bool,
 }
 
+#[test]
+fn test_glfw_window() {
+    fn foo<T: Window>() {}
+
+    foo::<GlfwWindow>();
+}
+
 impl GlfwWindow {
     /// Create a new game window from an existing GLFW window.
     pub fn from_pieces(win: glfw::Window, glfw: glfw::Glfw,
@@ -247,8 +254,6 @@ impl Modifier<GlfwWindow> for ExitOnEsc {
         window.exit_on_esc = val;
     }
 }
-
-impl Window for GlfwWindow {}
 
 fn glfw_map_key(keycode: glfw::Key) -> keyboard::Key {
     match keycode {
