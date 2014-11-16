@@ -4,6 +4,8 @@ A GLFW window back-end for the Piston game engine.
 
 Maintainers: @TyOverby, @bvssvni, @Coeuvre
 
+[How to contribute](https://github.com/PistonDevelopers/piston/blob/master/CONTRIBUTING.md)
+
 ### How to create a window
 
 ```Rust
