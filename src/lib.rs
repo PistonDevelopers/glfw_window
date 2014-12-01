@@ -116,34 +116,34 @@ impl GlfwWindow {
         self.glfw.poll_events();
         for (_, event) in glfw::flush_messages(&self.events) {
             match event {
-                glfw::KeyEvent(glfw::Key::Escape, _, glfw::Press, _)
+                glfw::WindowEvent::Key(glfw::Key::Escape, _, glfw::Press, _)
                 if self.exit_on_esc => {
                     self.window.set_should_close(true);
                 }
-                glfw::CharEvent(ch) => {
+                glfw::WindowEvent::Char(ch) => {
                     self.event_queue.push_back(input::Text(ch.to_string()));
                 }
-                glfw::KeyEvent(key, _, glfw::Press, _) => {
+                glfw::WindowEvent::Key(key, _, glfw::Press, _) => {
                     self.event_queue.push_back(
                         input::Press(input::Keyboard(glfw_map_key(key)))
                     );
                 }
-                glfw::KeyEvent(key, _, glfw::Release, _) => {
+                glfw::WindowEvent::Key(key, _, glfw::Release, _) => {
                     self.event_queue.push_back(
                         input::Release(input::Keyboard(glfw_map_key(key)))
                     );
                 }
-                glfw::MouseButtonEvent(button, glfw::Press, _) => {
+                glfw::WindowEvent::MouseButton(button, glfw::Press, _) => {
                     self.event_queue.push_back(
                         input::Press(input::Mouse(glfw_map_mouse(button)))
                     );
                 }
-                glfw::MouseButtonEvent(button, glfw::Release, _) => {
+                glfw::WindowEvent::MouseButton(button, glfw::Release, _) => {
                     self.event_queue.push_back(
                         input::Release(input::Mouse(glfw_map_mouse(button)))
                     );
                 }
-                glfw::CursorPosEvent(x, y) => {
+                glfw::WindowEvent::CursorPos(x, y) => {
                     self.event_queue.push_back(input::Move(input::MouseCursor(x, y)));
                     match self.last_mouse_pos {
                         Some((lx, ly)) => {
@@ -155,13 +155,13 @@ impl GlfwWindow {
                     };
                     self.last_mouse_pos = Some((x, y));
                 }
-                glfw::ScrollEvent(x, y) => {
+                glfw::WindowEvent::Scroll(x, y) => {
                     self.event_queue.push_back(input::Move(input::MouseScroll(x, y)));
                 }
-                glfw::SizeEvent(w, h) => {
+                glfw::WindowEvent::Size(w, h) => {
                     self.event_queue.push_back(input::Resize(w as u32, h as u32));
                 }
-                glfw::FocusEvent(focus) => {
+                glfw::WindowEvent::Focus(focus) => {
                     self.event_queue.push_back(input::Focus(focus));
                 }
                 _ => {}
