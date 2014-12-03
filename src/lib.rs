@@ -17,7 +17,9 @@ use glfw::Context;
 use input::{
     keyboard,
     mouse,
+    Button,
     InputEvent,
+    Motion,
 };
 use window::{
     Window,
@@ -80,16 +82,16 @@ impl GlfwWindow {
         let (major, minor) = opengl.get_major_minor();
 
         // Make sure we have the right GL version.
-        glfw.window_hint(glfw::ContextVersion(major as u32, minor as u32));
-        glfw.window_hint(glfw::OpenglForwardCompat(true));
-        glfw.window_hint(glfw::OpenglProfile(glfw::OpenGlProfileHint::Core));
-        glfw.window_hint(glfw::Samples(settings.samples as u32));
+        glfw.window_hint(glfw::WindowHint::ContextVersion(major as u32, minor as u32));
+        glfw.window_hint(glfw::WindowHint::OpenglForwardCompat(true));
+        glfw.window_hint(glfw::WindowHint::OpenglProfile(glfw::OpenGlProfileHint::Core));
+        glfw.window_hint(glfw::WindowHint::Samples(settings.samples as u32));
 
         // Create GLFW window.
         let (window, events) = glfw.create_window(
             settings.size[0],
             settings.size[1],
-            settings.title.as_slice(), glfw::Windowed
+            settings.title.as_slice(), glfw::WindowMode::Windowed
         ).expect("Failed to create GLFW window.");
         window.set_all_polling(true);
         window.make_current();
@@ -116,39 +118,39 @@ impl GlfwWindow {
         self.glfw.poll_events();
         for (_, event) in glfw::flush_messages(&self.events) {
             match event {
-                glfw::WindowEvent::Key(glfw::Key::Escape, _, glfw::Press, _)
+                glfw::WindowEvent::Key(glfw::Key::Escape, _, glfw::Action::Press, _)
                 if self.exit_on_esc => {
                     self.window.set_should_close(true);
                 }
                 glfw::WindowEvent::Char(ch) => {
-                    self.event_queue.push_back(input::Text(ch.to_string()));
+                    self.event_queue.push_back(InputEvent::Text(ch.to_string()));
                 }
-                glfw::WindowEvent::Key(key, _, glfw::Press, _) => {
+                glfw::WindowEvent::Key(key, _, glfw::Action::Press, _) => {
                     self.event_queue.push_back(
-                        input::Press(input::Keyboard(glfw_map_key(key)))
+                        InputEvent::Press(Button::Keyboard(glfw_map_key(key)))
                     );
                 }
-                glfw::WindowEvent::Key(key, _, glfw::Release, _) => {
+                glfw::WindowEvent::Key(key, _, glfw::Action::Release, _) => {
                     self.event_queue.push_back(
-                        input::Release(input::Keyboard(glfw_map_key(key)))
+                        InputEvent::Release(Button::Keyboard(glfw_map_key(key)))
                     );
                 }
-                glfw::WindowEvent::MouseButton(button, glfw::Press, _) => {
+                glfw::WindowEvent::MouseButton(button, glfw::Action::Press, _) => {
                     self.event_queue.push_back(
-                        input::Press(input::Mouse(glfw_map_mouse(button)))
+                        InputEvent::Press(Button::Mouse(glfw_map_mouse(button)))
                     );
                 }
-                glfw::WindowEvent::MouseButton(button, glfw::Release, _) => {
+                glfw::WindowEvent::MouseButton(button, glfw::Action::Release, _) => {
                     self.event_queue.push_back(
-                        input::Release(input::Mouse(glfw_map_mouse(button)))
+                        InputEvent::Release(Button::Mouse(glfw_map_mouse(button)))
                     );
                 }
                 glfw::WindowEvent::CursorPos(x, y) => {
-                    self.event_queue.push_back(input::Move(input::MouseCursor(x, y)));
+                    self.event_queue.push_back(InputEvent::Move(Motion::MouseCursor(x, y)));
                     match self.last_mouse_pos {
                         Some((lx, ly)) => {
                             self.event_queue.push_back(
-                                input::Move(input::MouseRelative(x - lx, y - ly))
+                                InputEvent::Move(Motion::MouseRelative(x - lx, y - ly))
                             )
                         }
                         None => {}
@@ -156,13 +158,13 @@ impl GlfwWindow {
                     self.last_mouse_pos = Some((x, y));
                 }
                 glfw::WindowEvent::Scroll(x, y) => {
-                    self.event_queue.push_back(input::Move(input::MouseScroll(x, y)));
+                    self.event_queue.push_back(InputEvent::Move(Motion::MouseScroll(x, y)));
                 }
                 glfw::WindowEvent::Size(w, h) => {
-                    self.event_queue.push_back(input::Resize(w as u32, h as u32));
+                    self.event_queue.push_back(InputEvent::Resize(w as u32, h as u32));
                 }
                 glfw::WindowEvent::Focus(focus) => {
-                    self.event_queue.push_back(input::Focus(focus));
+                    self.event_queue.push_back(InputEvent::Focus(focus));
                 }
                 _ => {}
             }
@@ -256,142 +258,146 @@ impl Modifier<GlfwWindow> for ExitOnEsc {
 }
 
 fn glfw_map_key(keycode: glfw::Key) -> keyboard::Key {
+    use input::keyboard::Key;
+
     match keycode {
-        glfw::Key::Num0 => keyboard::D0,
-        glfw::Key::Num1 => keyboard::D1,
-        glfw::Key::Num2 => keyboard::D2,
-        glfw::Key::Num3 => keyboard::D3,
-        glfw::Key::Num4 => keyboard::D4,
-        glfw::Key::Num5 => keyboard::D5,
-        glfw::Key::Num6 => keyboard::D6,
-        glfw::Key::Num7 => keyboard::D7,
-        glfw::Key::Num8 => keyboard::D8,
-        glfw::Key::Num9 => keyboard::D9,
-        glfw::Key::A => keyboard::A,
-        glfw::Key::B => keyboard::B,
-        glfw::Key::C => keyboard::C,
-        glfw::Key::D => keyboard::D,
-        glfw::Key::E => keyboard::E,
-        glfw::Key::F => keyboard::F,
-        glfw::Key::G => keyboard::G,
-        glfw::Key::H => keyboard::H,
-        glfw::Key::I => keyboard::I,
-        glfw::Key::J => keyboard::J,
-        glfw::Key::K => keyboard::K,
-        glfw::Key::L => keyboard::L,
-        glfw::Key::M => keyboard::M,
-        glfw::Key::N => keyboard::N,
-        glfw::Key::O => keyboard::O,
-        glfw::Key::P => keyboard::P,
-        glfw::Key::Q => keyboard::Q,
-        glfw::Key::R => keyboard::R,
-        glfw::Key::S => keyboard::S,
-        glfw::Key::T => keyboard::T,
-        glfw::Key::U => keyboard::U,
-        glfw::Key::V => keyboard::V,
-        glfw::Key::W => keyboard::W,
-        glfw::Key::X => keyboard::X,
-        glfw::Key::Y => keyboard::Y,
-        glfw::Key::Z => keyboard::Z,
-        glfw::Key::Apostrophe => keyboard::Unknown,
-        glfw::Key::Backslash => keyboard::Backslash,
-        glfw::Key::Backspace => keyboard::Backspace,
-        glfw::Key::CapsLock => keyboard::CapsLock,
-        glfw::Key::Delete => keyboard::Delete,
-        glfw::Key::Comma => keyboard::Comma,
-        glfw::Key::Down => keyboard::Down,
-        glfw::Key::End => keyboard::End,
-        glfw::Key::Enter => keyboard::Return,
-        glfw::Key::Equal => keyboard::Equals,
-        glfw::Key::Escape => keyboard::Escape,
-        glfw::Key::F1 => keyboard::F1,
-        glfw::Key::F2 => keyboard::F2,
-        glfw::Key::F3 => keyboard::F3,
-        glfw::Key::F4 => keyboard::F4,
-        glfw::Key::F5 => keyboard::F5,
-        glfw::Key::F6 => keyboard::F6,
-        glfw::Key::F7 => keyboard::F7,
-        glfw::Key::F8 => keyboard::F8,
-        glfw::Key::F9 => keyboard::F9,
-        glfw::Key::F10 => keyboard::F10,
-        glfw::Key::F11 => keyboard::F11,
-        glfw::Key::F12 => keyboard::F12,
-        glfw::Key::F13 => keyboard::F13,
-        glfw::Key::F14 => keyboard::F14,
-        glfw::Key::F15 => keyboard::F15,
-        glfw::Key::F16 => keyboard::F16,
-        glfw::Key::F17 => keyboard::F17,
-        glfw::Key::F18 => keyboard::F18,
-        glfw::Key::F19 => keyboard::F19,
-        glfw::Key::F20 => keyboard::F20,
-        glfw::Key::F21 => keyboard::F21,
-        glfw::Key::F22 => keyboard::F22,
-        glfw::Key::F23 => keyboard::F23,
-        glfw::Key::F24 => keyboard::F24,
+        glfw::Key::Num0 => Key::D0,
+        glfw::Key::Num1 => Key::D1,
+        glfw::Key::Num2 => Key::D2,
+        glfw::Key::Num3 => Key::D3,
+        glfw::Key::Num4 => Key::D4,
+        glfw::Key::Num5 => Key::D5,
+        glfw::Key::Num6 => Key::D6,
+        glfw::Key::Num7 => Key::D7,
+        glfw::Key::Num8 => Key::D8,
+        glfw::Key::Num9 => Key::D9,
+        glfw::Key::A => Key::A,
+        glfw::Key::B => Key::B,
+        glfw::Key::C => Key::C,
+        glfw::Key::D => Key::D,
+        glfw::Key::E => Key::E,
+        glfw::Key::F => Key::F,
+        glfw::Key::G => Key::G,
+        glfw::Key::H => Key::H,
+        glfw::Key::I => Key::I,
+        glfw::Key::J => Key::J,
+        glfw::Key::K => Key::K,
+        glfw::Key::L => Key::L,
+        glfw::Key::M => Key::M,
+        glfw::Key::N => Key::N,
+        glfw::Key::O => Key::O,
+        glfw::Key::P => Key::P,
+        glfw::Key::Q => Key::Q,
+        glfw::Key::R => Key::R,
+        glfw::Key::S => Key::S,
+        glfw::Key::T => Key::T,
+        glfw::Key::U => Key::U,
+        glfw::Key::V => Key::V,
+        glfw::Key::W => Key::W,
+        glfw::Key::X => Key::X,
+        glfw::Key::Y => Key::Y,
+        glfw::Key::Z => Key::Z,
+        glfw::Key::Apostrophe => Key::Unknown,
+        glfw::Key::Backslash => Key::Backslash,
+        glfw::Key::Backspace => Key::Backspace,
+        glfw::Key::CapsLock => Key::CapsLock,
+        glfw::Key::Delete => Key::Delete,
+        glfw::Key::Comma => Key::Comma,
+        glfw::Key::Down => Key::Down,
+        glfw::Key::End => Key::End,
+        glfw::Key::Enter => Key::Return,
+        glfw::Key::Equal => Key::Equals,
+        glfw::Key::Escape => Key::Escape,
+        glfw::Key::F1 => Key::F1,
+        glfw::Key::F2 => Key::F2,
+        glfw::Key::F3 => Key::F3,
+        glfw::Key::F4 => Key::F4,
+        glfw::Key::F5 => Key::F5,
+        glfw::Key::F6 => Key::F6,
+        glfw::Key::F7 => Key::F7,
+        glfw::Key::F8 => Key::F8,
+        glfw::Key::F9 => Key::F9,
+        glfw::Key::F10 => Key::F10,
+        glfw::Key::F11 => Key::F11,
+        glfw::Key::F12 => Key::F12,
+        glfw::Key::F13 => Key::F13,
+        glfw::Key::F14 => Key::F14,
+        glfw::Key::F15 => Key::F15,
+        glfw::Key::F16 => Key::F16,
+        glfw::Key::F17 => Key::F17,
+        glfw::Key::F18 => Key::F18,
+        glfw::Key::F19 => Key::F19,
+        glfw::Key::F20 => Key::F20,
+        glfw::Key::F21 => Key::F21,
+        glfw::Key::F22 => Key::F22,
+        glfw::Key::F23 => Key::F23,
+        glfw::Key::F24 => Key::F24,
         // Possibly next code.
-        glfw::Key::F25 => keyboard::Unknown,
-        glfw::Key::Kp0 => keyboard::NumPad0,
-        glfw::Key::Kp1 => keyboard::NumPad1,
-        glfw::Key::Kp2 => keyboard::NumPad2,
-        glfw::Key::Kp3 => keyboard::NumPad3,
-        glfw::Key::Kp4 => keyboard::NumPad4,
-        glfw::Key::Kp5 => keyboard::NumPad5,
-        glfw::Key::Kp6 => keyboard::NumPad6,
-        glfw::Key::Kp7 => keyboard::NumPad7,
-        glfw::Key::Kp8 => keyboard::NumPad8,
-        glfw::Key::Kp9 => keyboard::NumPad9,
-        glfw::Key::KpDecimal => keyboard::NumPadDecimal,
-        glfw::Key::KpDivide => keyboard::NumPadDivide,
-        glfw::Key::KpMultiply => keyboard::NumPadMultiply,
-        glfw::Key::KpSubtract => keyboard::NumPadMinus,
-        glfw::Key::KpAdd => keyboard::NumPadPlus,
-        glfw::Key::KpEnter => keyboard::NumPadEnter,
-        glfw::Key::KpEqual => keyboard::NumPadEquals,
-        glfw::Key::LeftShift => keyboard::LShift,
-        glfw::Key::LeftControl => keyboard::LCtrl,
-        glfw::Key::LeftAlt => keyboard::LAlt,
-        glfw::Key::LeftSuper => keyboard::LGui,
-        glfw::Key::RightShift => keyboard::RShift,
-        glfw::Key::RightControl => keyboard::RCtrl,
-        glfw::Key::RightAlt => keyboard::RAlt,
-        glfw::Key::RightSuper => keyboard::RGui,
+        glfw::Key::F25 => Key::Unknown,
+        glfw::Key::Kp0 => Key::NumPad0,
+        glfw::Key::Kp1 => Key::NumPad1,
+        glfw::Key::Kp2 => Key::NumPad2,
+        glfw::Key::Kp3 => Key::NumPad3,
+        glfw::Key::Kp4 => Key::NumPad4,
+        glfw::Key::Kp5 => Key::NumPad5,
+        glfw::Key::Kp6 => Key::NumPad6,
+        glfw::Key::Kp7 => Key::NumPad7,
+        glfw::Key::Kp8 => Key::NumPad8,
+        glfw::Key::Kp9 => Key::NumPad9,
+        glfw::Key::KpDecimal => Key::NumPadDecimal,
+        glfw::Key::KpDivide => Key::NumPadDivide,
+        glfw::Key::KpMultiply => Key::NumPadMultiply,
+        glfw::Key::KpSubtract => Key::NumPadMinus,
+        glfw::Key::KpAdd => Key::NumPadPlus,
+        glfw::Key::KpEnter => Key::NumPadEnter,
+        glfw::Key::KpEqual => Key::NumPadEquals,
+        glfw::Key::LeftShift => Key::LShift,
+        glfw::Key::LeftControl => Key::LCtrl,
+        glfw::Key::LeftAlt => Key::LAlt,
+        glfw::Key::LeftSuper => Key::LGui,
+        glfw::Key::RightShift => Key::RShift,
+        glfw::Key::RightControl => Key::RCtrl,
+        glfw::Key::RightAlt => Key::RAlt,
+        glfw::Key::RightSuper => Key::RGui,
         // Map to backslash?
-        glfw::Key::GraveAccent => keyboard::Unknown,
-        glfw::Key::Home => keyboard::Home,
-        glfw::Key::Insert => keyboard::Insert,
-        glfw::Key::Left => keyboard::Left,
-        glfw::Key::LeftBracket => keyboard::LeftBracket,
-        glfw::Key::Menu => keyboard::Menu,
-        glfw::Key::Minus => keyboard::Minus,
-        glfw::Key::NumLock => keyboard::NumLockClear,
-        glfw::Key::PageDown => keyboard::PageDown,
-        glfw::Key::PageUp => keyboard::PageUp,
-        glfw::Key::Pause => keyboard::Pause,
-        glfw::Key::Period => keyboard::Period,
-        glfw::Key::PrintScreen => keyboard::PrintScreen,
-        glfw::Key::Right => keyboard::Right,
-        glfw::Key::RightBracket => keyboard::RightBracket,
-        glfw::Key::ScrollLock => keyboard::ScrollLock,
-        glfw::Key::Semicolon => keyboard::Semicolon,
-        glfw::Key::Slash => keyboard::Slash,
-        glfw::Key::Space => keyboard::Space,
-        glfw::Key::Tab => keyboard::Tab,
-        glfw::Key::Up => keyboard::Up,
-        glfw::Key::World1 => keyboard::Unknown,
-        glfw::Key::World2 => keyboard::Unknown,
+        glfw::Key::GraveAccent => Key::Unknown,
+        glfw::Key::Home => Key::Home,
+        glfw::Key::Insert => Key::Insert,
+        glfw::Key::Left => Key::Left,
+        glfw::Key::LeftBracket => Key::LeftBracket,
+        glfw::Key::Menu => Key::Menu,
+        glfw::Key::Minus => Key::Minus,
+        glfw::Key::NumLock => Key::NumLockClear,
+        glfw::Key::PageDown => Key::PageDown,
+        glfw::Key::PageUp => Key::PageUp,
+        glfw::Key::Pause => Key::Pause,
+        glfw::Key::Period => Key::Period,
+        glfw::Key::PrintScreen => Key::PrintScreen,
+        glfw::Key::Right => Key::Right,
+        glfw::Key::RightBracket => Key::RightBracket,
+        glfw::Key::ScrollLock => Key::ScrollLock,
+        glfw::Key::Semicolon => Key::Semicolon,
+        glfw::Key::Slash => Key::Slash,
+        glfw::Key::Space => Key::Space,
+        glfw::Key::Tab => Key::Tab,
+        glfw::Key::Up => Key::Up,
+        glfw::Key::World1 => Key::Unknown,
+        glfw::Key::World2 => Key::Unknown,
         // _ => keyboard::Unknown,
     }
 }
 
 fn glfw_map_mouse(mouse_button: glfw::MouseButton) -> mouse::Button {
+    use input::mouse::Button;
+
     match mouse_button {
-        glfw::MouseButton::Button1 => mouse::Left,
-        glfw::MouseButton::Button2 => mouse::Right,
-        glfw::MouseButton::Button3 => mouse::Middle,
-        glfw::MouseButton::Button4 => mouse::X1,
-        glfw::MouseButton::Button5 => mouse::X2,
-        glfw::MouseButton::Button6 => mouse::Button6,
-        glfw::MouseButton::Button7 => mouse::Button7,
-        glfw::MouseButton::Button8 => mouse::Button8,
+        glfw::MouseButton::Button1 => Button::Left,
+        glfw::MouseButton::Button2 => Button::Right,
+        glfw::MouseButton::Button3 => Button::Middle,
+        glfw::MouseButton::Button4 => Button::X1,
+        glfw::MouseButton::Button5 => Button::X2,
+        glfw::MouseButton::Button6 => Button::Button6,
+        glfw::MouseButton::Button7 => Button::Button7,
+        glfw::MouseButton::Button8 => Button::Button8,
     }
 }
