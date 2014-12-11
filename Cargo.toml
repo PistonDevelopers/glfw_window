@@ -1,6 +1,6 @@
 [package]
 
-name = "glfw_window"
+name = "pistoncore-glfw_window"
 version = "0.0.0"
 authors = [
     "bvssvni <bvssvni@gmail.com>",
@@ -14,18 +14,23 @@ authors = [
     "reem",
     "TyOverby <ty@pre-alpha.com>"]
 tags = []
+description = "A GLFW window back-end for the Piston game engine"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/pistondevelopers/glfw_window.git"
+homepage = "https://github.com/pistondevelopers/glfw_window"
 
-[dependencies.window]
+[dependencies.pistoncore-window]
 
 git = "https://github.com/PistonDevelopers/window"
+
+[dependencies.pistoncore-input]
+
+git = "https://github.com/PistonDevelopers/input"
 
 [dependencies.shader_version]
 
 git = "https://github.com/PistonDevelopers/shader_version"
-
-[dependencies.input]
-
-git = "https://github.com/PistonDevelopers/input"
 
 [dependencies.glfw]
 
