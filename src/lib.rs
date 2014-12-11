@@ -16,9 +16,9 @@ use collections::RingBuf;
 use glfw::Context;
 use input::{
     keyboard,
-    mouse,
+    MouseButton,
     Button,
-    InputEvent,
+    Input,
     Motion,
 };
 use window::{
@@ -38,7 +38,7 @@ pub struct GlfwWindow {
     events: Receiver<(f64, glfw::WindowEvent)>,
     /// GLFW context.
     pub glfw: glfw::Glfw,
-    event_queue: RingBuf<input::InputEvent>,
+    event_queue: RingBuf<input::Input>,
     // Used to compute relative mouse movement.
     last_mouse_pos: Option<(f64, f64)>,
     // The back-end does not remember the title.
@@ -123,34 +123,34 @@ impl GlfwWindow {
                     self.window.set_should_close(true);
                 }
                 glfw::WindowEvent::Char(ch) => {
-                    self.event_queue.push_back(InputEvent::Text(ch.to_string()));
+                    self.event_queue.push_back(Input::Text(ch.to_string()));
                 }
                 glfw::WindowEvent::Key(key, _, glfw::Action::Press, _) => {
                     self.event_queue.push_back(
-                        InputEvent::Press(Button::Keyboard(glfw_map_key(key)))
+                        Input::Press(Button::Keyboard(glfw_map_key(key)))
                     );
                 }
                 glfw::WindowEvent::Key(key, _, glfw::Action::Release, _) => {
                     self.event_queue.push_back(
-                        InputEvent::Release(Button::Keyboard(glfw_map_key(key)))
+                        Input::Release(Button::Keyboard(glfw_map_key(key)))
                     );
                 }
                 glfw::WindowEvent::MouseButton(button, glfw::Action::Press, _) => {
                     self.event_queue.push_back(
-                        InputEvent::Press(Button::Mouse(glfw_map_mouse(button)))
+                        Input::Press(Button::Mouse(glfw_map_mouse(button)))
                     );
                 }
                 glfw::WindowEvent::MouseButton(button, glfw::Action::Release, _) => {
                     self.event_queue.push_back(
-                        InputEvent::Release(Button::Mouse(glfw_map_mouse(button)))
+                        Input::Release(Button::Mouse(glfw_map_mouse(button)))
                     );
                 }
                 glfw::WindowEvent::CursorPos(x, y) => {
-                    self.event_queue.push_back(InputEvent::Move(Motion::MouseCursor(x, y)));
+                    self.event_queue.push_back(Input::Move(Motion::MouseCursor(x, y)));
                     match self.last_mouse_pos {
                         Some((lx, ly)) => {
                             self.event_queue.push_back(
-                                InputEvent::Move(Motion::MouseRelative(x - lx, y - ly))
+                                Input::Move(Motion::MouseRelative(x - lx, y - ly))
                             )
                         }
                         None => {}
@@ -158,13 +158,13 @@ impl GlfwWindow {
                     self.last_mouse_pos = Some((x, y));
                 }
                 glfw::WindowEvent::Scroll(x, y) => {
-                    self.event_queue.push_back(InputEvent::Move(Motion::MouseScroll(x, y)));
+                    self.event_queue.push_back(Input::Move(Motion::MouseScroll(x, y)));
                 }
                 glfw::WindowEvent::Size(w, h) => {
-                    self.event_queue.push_back(InputEvent::Resize(w as u32, h as u32));
+                    self.event_queue.push_back(Input::Resize(w as u32, h as u32));
                 }
                 glfw::WindowEvent::Focus(focus) => {
-                    self.event_queue.push_back(InputEvent::Focus(focus));
+                    self.event_queue.push_back(Input::Focus(focus));
                 }
                 _ => {}
             }
@@ -185,8 +185,8 @@ impl Get<ShouldClose> for GlfwWindow {
     }
 }
 
-impl PollEvent<InputEvent> for GlfwWindow {
-    fn poll_event(&mut self) -> Option<input::InputEvent> {
+impl PollEvent<Input> for GlfwWindow {
+    fn poll_event(&mut self) -> Option<input::Input> {
         self.flush_messages();
 
         if self.event_queue.len() != 0 {
@@ -387,17 +387,15 @@ fn glfw_map_key(keycode: glfw::Key) -> keyboard::Key {
     }
 }
 
-fn glfw_map_mouse(mouse_button: glfw::MouseButton) -> mouse::Button {
-    use input::mouse::Button;
-
+fn glfw_map_mouse(mouse_button: glfw::MouseButton) -> MouseButton {
     match mouse_button {
-        glfw::MouseButton::Button1 => Button::Left,
-        glfw::MouseButton::Button2 => Button::Right,
-        glfw::MouseButton::Button3 => Button::Middle,
-        glfw::MouseButton::Button4 => Button::X1,
-        glfw::MouseButton::Button5 => Button::X2,
-        glfw::MouseButton::Button6 => Button::Button6,
-        glfw::MouseButton::Button7 => Button::Button7,
-        glfw::MouseButton::Button8 => Button::Button8,
+        glfw::MouseButton::Button1 => MouseButton::Left,
+        glfw::MouseButton::Button2 => MouseButton::Right,
+        glfw::MouseButton::Button3 => MouseButton::Middle,
+        glfw::MouseButton::Button4 => MouseButton::X1,
+        glfw::MouseButton::Button5 => MouseButton::X2,
+        glfw::MouseButton::Button6 => MouseButton::Button6,
+        glfw::MouseButton::Button7 => MouseButton::Button7,
+        glfw::MouseButton::Button8 => MouseButton::Button8,
     }
 }
