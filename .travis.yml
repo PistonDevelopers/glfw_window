@@ -18,9 +18,6 @@ install:
     - make
     - sudo make install
     - cd ..
-before_script:
-    - rustc -v
-    - cargo -V
 script:
     - cargo build -v
     - cargo test -v
