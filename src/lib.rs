@@ -11,7 +11,7 @@ extern crate input;
 extern crate current;
 
 // External crates.
-use current::{ Get, Modifier };
+use current::{ ActOn, GetFrom, SetAt };
 use collections::RingBuf;
 use glfw::Context;
 use input::{
@@ -22,10 +22,9 @@ use input::{
     Motion,
 };
 use window::{
-    Window,
     WindowSettings,
     ShouldClose, Size, PollEvent, SwapBuffers,
-    CaptureCursor, DrawSize, Title, SetTitle,
+    CaptureCursor, DrawSize, Title,
     ExitOnEsc
 };
 use shader_version::opengl::OpenGL;
@@ -44,13 +43,6 @@ pub struct GlfwWindow {
     // The back-end does not remember the title.
     title: String,
     exit_on_esc: bool,
-}
-
-#[test]
-fn test_glfw_window() {
-    fn foo<T: Window>() {}
-
-    foo::<GlfwWindow>();
 }
 
 impl GlfwWindow {
@@ -172,41 +164,41 @@ impl GlfwWindow {
     }
 }
 
-impl Get<Size> for GlfwWindow {
-    fn get(&self) -> Size {
-        let (w, h) = self.window.get_size();
+impl GetFrom<GlfwWindow> for Size {
+    fn get_from(obj: &GlfwWindow) -> Size {
+        let (w, h) = obj.window.get_size();
         Size([w as u32, h as u32])
     }
 }
 
-impl Get<ShouldClose> for GlfwWindow {
-    fn get(&self) -> ShouldClose {
-        ShouldClose(self.window.should_close())
+impl GetFrom<GlfwWindow> for ShouldClose {
+    fn get_from(obj: &GlfwWindow) -> ShouldClose {
+        ShouldClose(obj.window.should_close())
     }
 }
 
-impl PollEvent<Input> for GlfwWindow {
-    fn poll_event(&mut self) -> Option<input::Input> {
-        self.flush_messages();
+impl ActOn<GlfwWindow, Option<Input>> for PollEvent {
+    fn act_on(self, window: &mut GlfwWindow) -> Option<Input> {
+        window.flush_messages();
 
-        if self.event_queue.len() != 0 {
-            self.event_queue.pop_front()
+        if window.event_queue.len() != 0 {
+            window.event_queue.pop_front()
         } else {
             None
         }
     }
 }
 
-impl SwapBuffers for GlfwWindow {
-    fn swap_buffers(&mut self) {
+impl ActOn<GlfwWindow, ()> for SwapBuffers {
+    fn act_on(self, window: &mut GlfwWindow) {
         use glfw::Context;
 
-        self.window.swap_buffers();
+        window.window.swap_buffers();
     }
 }
 
-impl Modifier<GlfwWindow> for CaptureCursor {
-    fn modify(self, window: &mut GlfwWindow) {
+impl SetAt<GlfwWindow> for CaptureCursor {
+    fn set_at(self, window: &mut GlfwWindow) {
         let CaptureCursor(enabled) = self;
         if enabled {
             window.window.set_cursor_mode(glfw::CursorMode::Disabled)
@@ -217,41 +209,41 @@ impl Modifier<GlfwWindow> for CaptureCursor {
     }
 }
 
-impl Modifier<GlfwWindow> for ShouldClose {
-    fn modify(self, window: &mut GlfwWindow) {
+impl SetAt<GlfwWindow> for ShouldClose {
+    fn set_at(self, window: &mut GlfwWindow) {
         let ShouldClose(val) = self;
         window.window.set_should_close(val);
     }
 }
 
-impl Get<DrawSize> for GlfwWindow {
-    fn get(&self) -> DrawSize {
-        let (w, h) = self.window.get_framebuffer_size();
+impl GetFrom<GlfwWindow> for DrawSize {
+    fn get_from(obj: &GlfwWindow) -> DrawSize {
+        let (w, h) = obj.window.get_framebuffer_size();
         DrawSize([w as u32, h as u32])
     }
 }
 
-impl Get<Title> for GlfwWindow {
-    fn get(&self) -> Title {
-        Title(self.title.clone())
+impl GetFrom<GlfwWindow> for Title {
+    fn get_from(obj: &GlfwWindow) -> Title {
+        Title(obj.title.clone())
     }
 }
 
-impl Modifier<GlfwWindow> for Title {
-    fn modify(self, window: &mut GlfwWindow) {
+impl SetAt<GlfwWindow> for Title {
+    fn set_at(self, window: &mut GlfwWindow) {
         let Title(val) = self;
         window.window.set_title(val.as_slice())
     }
 }
 
-impl Get<ExitOnEsc> for GlfwWindow {
-    fn get(&self) -> ExitOnEsc {
-        ExitOnEsc(self.exit_on_esc)
+impl GetFrom<GlfwWindow> for ExitOnEsc {
+    fn get_from(obj: &GlfwWindow) -> ExitOnEsc {
+        ExitOnEsc(obj.exit_on_esc)
     }
 }
 
-impl Modifier<GlfwWindow> for ExitOnEsc {
-    fn modify(self, window: &mut GlfwWindow) {
+impl SetAt<GlfwWindow> for ExitOnEsc {
+    fn set_at(self, window: &mut GlfwWindow) {
         let ExitOnEsc(val) = self;
         window.exit_on_esc = val;
     }
