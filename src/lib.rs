@@ -8,10 +8,10 @@ extern crate gl;
 extern crate window;
 extern crate shader_version;
 extern crate input;
-extern crate current;
+extern crate quack;
 
 // External crates.
-use current::{ ActOn, GetFrom, SetAt };
+use quack::{ ActOn, GetFrom, SetAt };
 use collections::RingBuf;
 use glfw::Context;
 use input::{
