@@ -1,18 +1,20 @@
 #![deny(missing_docs)]
+#![allow(unstable)]
 
 //! A GLFW window back-end for the Piston game engine.
 
 extern crate glfw;
-extern crate collections;
 extern crate gl;
 extern crate window;
 extern crate shader_version;
 extern crate input;
 extern crate quack;
 
+use std::sync::mpsc::Receiver;
+
 // External crates.
-use quack::{ ActOn, GetFrom, SetAt };
-use collections::RingBuf;
+use quack::{ ActOn, GetFrom, Me, SetAt };
+use std::collections::RingBuf;
 use glfw::Context;
 use input::{
     keyboard,
@@ -164,21 +166,30 @@ impl GlfwWindow {
     }
 }
 
-impl GetFrom<GlfwWindow> for Size {
-    fn get_from(obj: &GlfwWindow) -> Size {
+impl GetFrom for (Size, GlfwWindow) {
+    type Property = Size;
+    type Object = GlfwWindow;
+
+    fn get_from(_: Me<Self>, obj: &GlfwWindow) -> Size {
         let (w, h) = obj.window.get_size();
         Size([w as u32, h as u32])
     }
 }
 
-impl GetFrom<GlfwWindow> for ShouldClose {
-    fn get_from(obj: &GlfwWindow) -> ShouldClose {
+impl GetFrom for (ShouldClose, GlfwWindow) {
+    type Property = ShouldClose;
+    type Object = GlfwWindow;
+
+    fn get_from(_: Me<Self>, obj: &GlfwWindow) -> ShouldClose {
         ShouldClose(obj.window.should_close())
     }
 }
 
-impl ActOn<GlfwWindow, Option<Input>> for PollEvent {
-    fn act_on(self, window: &mut GlfwWindow) -> Option<Input> {
+impl ActOn<Option<Input>> for (PollEvent, GlfwWindow) {
+    type Action = PollEvent;
+    type Object = GlfwWindow;
+
+    fn act_on(_: Me<Self>, _: PollEvent, window: &mut GlfwWindow) -> Option<Input> {
         window.flush_messages();
 
         if window.event_queue.len() != 0 {
@@ -189,17 +200,26 @@ impl ActOn<GlfwWindow, Option<Input>> for PollEvent {
     }
 }
 
-impl ActOn<GlfwWindow, ()> for SwapBuffers {
-    fn act_on(self, window: &mut GlfwWindow) {
+impl ActOn<()> for (SwapBuffers, GlfwWindow) {
+    type Action = SwapBuffers;
+    type Object = GlfwWindow;
+
+    fn act_on(_: Me<Self>, _: SwapBuffers, window: &mut GlfwWindow) {
         use glfw::Context;
 
         window.window.swap_buffers();
     }
 }
 
-impl SetAt<GlfwWindow> for CaptureCursor {
-    fn set_at(self, window: &mut GlfwWindow) {
-        let CaptureCursor(enabled) = self;
+impl SetAt for (CaptureCursor, GlfwWindow) {
+    type Property = CaptureCursor;
+    type Object = GlfwWindow;
+
+    fn set_at(
+        _: Me<Self>, 
+        CaptureCursor(enabled): CaptureCursor, 
+        window: &mut GlfwWindow
+    ) {
         if enabled {
             window.window.set_cursor_mode(glfw::CursorMode::Disabled)
         } else {
@@ -209,42 +229,57 @@ impl SetAt<GlfwWindow> for CaptureCursor {
     }
 }
 
-impl SetAt<GlfwWindow> for ShouldClose {
-    fn set_at(self, window: &mut GlfwWindow) {
-        let ShouldClose(val) = self;
+impl SetAt for (ShouldClose, GlfwWindow) {
+    type Property = ShouldClose;
+    type Object = GlfwWindow;
+
+    fn set_at(_: Me<Self>, ShouldClose(val): ShouldClose, window: &mut GlfwWindow) {
         window.window.set_should_close(val);
     }
 }
 
-impl GetFrom<GlfwWindow> for DrawSize {
-    fn get_from(obj: &GlfwWindow) -> DrawSize {
+impl GetFrom for (DrawSize, GlfwWindow) {
+    type Property = DrawSize;
+    type Object = GlfwWindow;
+
+    fn get_from(_: Me<Self>, obj: &GlfwWindow) -> DrawSize {
         let (w, h) = obj.window.get_framebuffer_size();
         DrawSize([w as u32, h as u32])
     }
 }
 
-impl GetFrom<GlfwWindow> for Title {
-    fn get_from(obj: &GlfwWindow) -> Title {
+impl GetFrom for (Title, GlfwWindow) {
+    type Property = Title;
+    type Object = GlfwWindow;
+
+    fn get_from(_: Me<Self>, obj: &GlfwWindow) -> Title {
         Title(obj.title.clone())
     }
 }
 
-impl SetAt<GlfwWindow> for Title {
-    fn set_at(self, window: &mut GlfwWindow) {
-        let Title(val) = self;
-        window.window.set_title(val.as_slice())
+impl SetAt for (Title, GlfwWindow) {
+    type Property = Title;
+    type Object = GlfwWindow;
+
+    fn set_at(_: Me<Self>, Title(val): Title, window: &mut GlfwWindow) {
+        window.window.set_title(&val[])
     }
 }
 
-impl GetFrom<GlfwWindow> for ExitOnEsc {
-    fn get_from(obj: &GlfwWindow) -> ExitOnEsc {
+impl GetFrom for (ExitOnEsc, GlfwWindow) {
+    type Property = ExitOnEsc;
+    type Object = GlfwWindow;
+
+    fn get_from(_: Me<Self>, obj: &GlfwWindow) -> ExitOnEsc {
         ExitOnEsc(obj.exit_on_esc)
     }
 }
 
-impl SetAt<GlfwWindow> for ExitOnEsc {
-    fn set_at(self, window: &mut GlfwWindow) {
-        let ExitOnEsc(val) = self;
+impl SetAt for (ExitOnEsc, GlfwWindow) {
+    type Property = ExitOnEsc;
+    type Object = GlfwWindow;
+
+    fn set_at(_: Me<Self>, ExitOnEsc(val): ExitOnEsc, window: &mut GlfwWindow) {
         window.exit_on_esc = val;
     }
 }
