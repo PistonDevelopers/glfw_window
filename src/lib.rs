@@ -49,7 +49,7 @@ pub struct GlfwWindow {
 
 impl GlfwWindow {
     /// Create a new game window from an existing GLFW window.
-    pub fn from_pieces(win: glfw::Window, glfw: glfw::Glfw,
+    pub fn from_pieces(mut win: glfw::Window, glfw: glfw::Glfw,
                        events: Receiver<(f64, glfw::WindowEvent)>,
                        exit_on_esc: bool) -> GlfwWindow {
         win.set_all_polling(true);
@@ -71,7 +71,7 @@ impl GlfwWindow {
         use glfw::Context;
 
         // Initialize GLFW.
-        let glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
+        let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
 
         let (major, minor) = opengl.get_major_minor();
 
@@ -82,7 +82,7 @@ impl GlfwWindow {
         glfw.window_hint(glfw::WindowHint::Samples(settings.samples as u32));
 
         // Create GLFW window.
-        let (window, events) = glfw.create_window(
+        let (mut window, events) = glfw.create_window(
             settings.size[0],
             settings.size[1],
             settings.title.as_slice(), glfw::WindowMode::Windowed
