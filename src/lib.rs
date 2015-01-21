@@ -13,7 +13,7 @@ extern crate quack;
 use std::sync::mpsc::Receiver;
 
 // External crates.
-use quack::{ ActOn, GetFrom, Me, SetAt };
+use quack::{ ActOn, GetFrom, SetAt };
 use std::collections::RingBuf;
 use glfw::Context;
 use input::{
@@ -170,7 +170,7 @@ impl GetFrom for (Size, GlfwWindow) {
     type Property = Size;
     type Object = GlfwWindow;
 
-    fn get_from(_: Me<Self>, obj: &GlfwWindow) -> Size {
+    fn get_from(obj: &GlfwWindow) -> Size {
         let (w, h) = obj.window.get_size();
         Size([w as u32, h as u32])
     }
@@ -180,7 +180,7 @@ impl GetFrom for (ShouldClose, GlfwWindow) {
     type Property = ShouldClose;
     type Object = GlfwWindow;
 
-    fn get_from(_: Me<Self>, obj: &GlfwWindow) -> ShouldClose {
+    fn get_from(obj: &GlfwWindow) -> ShouldClose {
         ShouldClose(obj.window.should_close())
     }
 }
@@ -189,7 +189,7 @@ impl ActOn<Option<Input>> for (PollEvent, GlfwWindow) {
     type Action = PollEvent;
     type Object = GlfwWindow;
 
-    fn act_on(_: Me<Self>, _: PollEvent, window: &mut GlfwWindow) -> Option<Input> {
+    fn act_on(_: PollEvent, window: &mut GlfwWindow) -> Option<Input> {
         window.flush_messages();
 
         if window.event_queue.len() != 0 {
@@ -204,7 +204,7 @@ impl ActOn<()> for (SwapBuffers, GlfwWindow) {
     type Action = SwapBuffers;
     type Object = GlfwWindow;
 
-    fn act_on(_: Me<Self>, _: SwapBuffers, window: &mut GlfwWindow) {
+    fn act_on(_: SwapBuffers, window: &mut GlfwWindow) {
         use glfw::Context;
 
         window.window.swap_buffers();
@@ -216,7 +216,6 @@ impl SetAt for (CaptureCursor, GlfwWindow) {
     type Object = GlfwWindow;
 
     fn set_at(
-        _: Me<Self>, 
         CaptureCursor(enabled): CaptureCursor, 
         window: &mut GlfwWindow
     ) {
@@ -233,7 +232,7 @@ impl SetAt for (ShouldClose, GlfwWindow) {
     type Property = ShouldClose;
     type Object = GlfwWindow;
 
-    fn set_at(_: Me<Self>, ShouldClose(val): ShouldClose, window: &mut GlfwWindow) {
+    fn set_at(ShouldClose(val): ShouldClose, window: &mut GlfwWindow) {
         window.window.set_should_close(val);
     }
 }
@@ -242,7 +241,7 @@ impl GetFrom for (DrawSize, GlfwWindow) {
     type Property = DrawSize;
     type Object = GlfwWindow;
 
-    fn get_from(_: Me<Self>, obj: &GlfwWindow) -> DrawSize {
+    fn get_from(obj: &GlfwWindow) -> DrawSize {
         let (w, h) = obj.window.get_framebuffer_size();
         DrawSize([w as u32, h as u32])
     }
@@ -252,7 +251,7 @@ impl GetFrom for (Title, GlfwWindow) {
     type Property = Title;
     type Object = GlfwWindow;
 
-    fn get_from(_: Me<Self>, obj: &GlfwWindow) -> Title {
+    fn get_from(obj: &GlfwWindow) -> Title {
         Title(obj.title.clone())
     }
 }
@@ -261,7 +260,7 @@ impl SetAt for (Title, GlfwWindow) {
     type Property = Title;
     type Object = GlfwWindow;
 
-    fn set_at(_: Me<Self>, Title(val): Title, window: &mut GlfwWindow) {
+    fn set_at(Title(val): Title, window: &mut GlfwWindow) {
         window.window.set_title(&val[])
     }
 }
@@ -270,7 +269,7 @@ impl GetFrom for (ExitOnEsc, GlfwWindow) {
     type Property = ExitOnEsc;
     type Object = GlfwWindow;
 
-    fn get_from(_: Me<Self>, obj: &GlfwWindow) -> ExitOnEsc {
+    fn get_from(obj: &GlfwWindow) -> ExitOnEsc {
         ExitOnEsc(obj.exit_on_esc)
     }
 }
@@ -279,7 +278,7 @@ impl SetAt for (ExitOnEsc, GlfwWindow) {
     type Property = ExitOnEsc;
     type Object = GlfwWindow;
 
-    fn set_at(_: Me<Self>, ExitOnEsc(val): ExitOnEsc, window: &mut GlfwWindow) {
+    fn set_at(ExitOnEsc(val): ExitOnEsc, window: &mut GlfwWindow) {
         window.exit_on_esc = val;
     }
 }
