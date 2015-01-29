@@ -8,12 +8,12 @@ extern crate gl;
 extern crate window;
 extern crate shader_version;
 extern crate input;
+#[macro_use]
 extern crate quack;
 
 use std::sync::mpsc::Receiver;
 
 // External crates.
-use quack::{ ActOn, GetFrom, SetAt };
 use std::collections::RingBuf;
 use glfw::Context;
 use input::{
@@ -164,90 +164,51 @@ impl GlfwWindow {
             }
         }
     }
-}
+    
+    fn poll_event(&mut self) -> Option<Input> {
+        self.flush_messages();
 
-impl GetFrom for (Size, GlfwWindow) {
-    fn get_from(obj: &GlfwWindow) -> Size {
-        let (w, h) = obj.window.get_size();
-        Size([w as u32, h as u32])
-    }
-}
-
-impl GetFrom for (ShouldClose, GlfwWindow) {
-    fn get_from(obj: &GlfwWindow) -> ShouldClose {
-        ShouldClose(obj.window.should_close())
-    }
-}
-
-impl ActOn<Option<Input>> for (PollEvent, GlfwWindow) {
-    fn act_on(_: PollEvent, window: &mut GlfwWindow) -> Option<Input> {
-        window.flush_messages();
-
-        if window.event_queue.len() != 0 {
-            window.event_queue.pop_front()
+        if self.event_queue.len() != 0 {
+            self.event_queue.pop_front()
         } else {
             None
         }
     }
-}
 
-impl ActOn<()> for (SwapBuffers, GlfwWindow) {
-    fn act_on(_: SwapBuffers, window: &mut GlfwWindow) {
-        use glfw::Context;
-
-        window.window.swap_buffers();
-    }
-}
-
-impl SetAt for (CaptureCursor, GlfwWindow) {
-    fn set_at(
-        CaptureCursor(enabled): CaptureCursor, 
-        window: &mut GlfwWindow
-    ) {
+    fn capture_cursor(&mut self, enabled: bool) {
         if enabled {
-            window.window.set_cursor_mode(glfw::CursorMode::Disabled)
+            self.window.set_cursor_mode(glfw::CursorMode::Disabled)
         } else {
-            window.window.set_cursor_mode(glfw::CursorMode::Normal);
-            window.last_mouse_pos = None;
+            self.window.set_cursor_mode(glfw::CursorMode::Normal);
+            self.last_mouse_pos = None;
         }
     }
 }
 
-impl SetAt for (ShouldClose, GlfwWindow) {
-    fn set_at(ShouldClose(val): ShouldClose, window: &mut GlfwWindow) {
-        window.window.set_should_close(val);
+quack! {
+obj: GlfwWindow[]
+get:
+    fn () -> Size {
+        let (w, h) = obj.window.get_size();
+        Size([w as u32, h as u32])
     }
-}
-
-impl GetFrom for (DrawSize, GlfwWindow) {
-    fn get_from(obj: &GlfwWindow) -> DrawSize {
+    fn () -> ShouldClose {
+        ShouldClose(obj.window.should_close())
+    }
+    fn () -> DrawSize {
         let (w, h) = obj.window.get_framebuffer_size();
         DrawSize([w as u32, h as u32])
     }
-}
-
-impl GetFrom for (Title, GlfwWindow) {
-    fn get_from(obj: &GlfwWindow) -> Title {
-        Title(obj.title.clone())
-    }
-}
-
-impl SetAt for (Title, GlfwWindow) {
-    fn set_at(Title(val): Title, window: &mut GlfwWindow) {
-        window.window.set_title(&val[])
-    }
-}
-
-impl GetFrom for (ExitOnEsc, GlfwWindow) {
-    fn get_from(obj: &GlfwWindow) -> ExitOnEsc {
-        ExitOnEsc(obj.exit_on_esc)
-    }
-}
-
-impl SetAt for (ExitOnEsc, GlfwWindow) {
-    fn set_at(ExitOnEsc(val): ExitOnEsc, window: &mut GlfwWindow) {
-        window.exit_on_esc = val;
-    }
+    fn () -> Title { Title(obj.title.clone()) }
+    fn () -> ExitOnEsc { ExitOnEsc(obj.exit_on_esc) }
+set:
+    fn (val: CaptureCursor) { obj.capture_cursor(val.0) }
+    fn (val: ShouldClose) { obj.window.set_should_close(val.0) }
+    fn (val: Title) { obj.window.set_title(&val.0[]) }
+    fn (val: ExitOnEsc) { obj.exit_on_esc = val.0 }
+action:
+    fn (__: PollEvent) -> Option<Input> { obj.poll_event() }
+    fn (__: SwapBuffers) -> () { obj.window.swap_buffers() }
 }
 
 fn glfw_map_key(keycode: glfw::Key) -> keyboard::Key {
