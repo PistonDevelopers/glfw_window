@@ -188,27 +188,27 @@ impl GlfwWindow {
 quack! {
 obj: GlfwWindow[]
 get:
-    fn () -> Size {
+    fn () -> Size [] {
         let (w, h) = obj.window.get_size();
         Size([w as u32, h as u32])
     }
-    fn () -> ShouldClose {
+    fn () -> ShouldClose [] {
         ShouldClose(obj.window.should_close())
     }
-    fn () -> DrawSize {
+    fn () -> DrawSize [] {
         let (w, h) = obj.window.get_framebuffer_size();
         DrawSize([w as u32, h as u32])
     }
-    fn () -> Title { Title(obj.title.clone()) }
-    fn () -> ExitOnEsc { ExitOnEsc(obj.exit_on_esc) }
+    fn () -> Title [] { Title(obj.title.clone()) }
+    fn () -> ExitOnEsc [] { ExitOnEsc(obj.exit_on_esc) }
 set:
-    fn (val: CaptureCursor) { obj.capture_cursor(val.0) }
-    fn (val: ShouldClose) { obj.window.set_should_close(val.0) }
-    fn (val: Title) { obj.window.set_title(&val.0[]) }
-    fn (val: ExitOnEsc) { obj.exit_on_esc = val.0 }
+    fn (val: CaptureCursor) [] { obj.capture_cursor(val.0) }
+    fn (val: ShouldClose) [] { obj.window.set_should_close(val.0) }
+    fn (val: Title) [] { obj.window.set_title(&val.0[]) }
+    fn (val: ExitOnEsc) [] { obj.exit_on_esc = val.0 }
 action:
-    fn (__: PollEvent) -> Option<Input> { obj.poll_event() }
-    fn (__: SwapBuffers) -> () { obj.window.swap_buffers() }
+    fn (__: PollEvent) -> Option<Input> [] { obj.poll_event() }
+    fn (__: SwapBuffers) -> () [] { obj.window.swap_buffers() }
 }
 
 fn glfw_map_key(keycode: glfw::Key) -> keyboard::Key {
