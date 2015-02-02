@@ -1,5 +1,5 @@
 #![deny(missing_docs)]
-#![allow(unstable)]
+#![feature(collections)]
 
 //! A GLFW window back-end for the Piston game engine.
 
@@ -85,7 +85,7 @@ impl GlfwWindow {
         let (mut window, events) = glfw.create_window(
             settings.size[0],
             settings.size[1],
-            settings.title.as_slice(), glfw::WindowMode::Windowed
+            &settings.title[], glfw::WindowMode::Windowed
         ).expect("Failed to create GLFW window.");
         window.set_all_polling(true);
         window.make_current();
