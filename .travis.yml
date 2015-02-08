@@ -13,7 +13,7 @@ before_install:
     - sudo apt-get update -qq
 install:
     # CMake, require newer version, than in Travis
-    - sudo apt-get install cmake
+    - sudo apt-get install libXxf86vm-dev cmake
 script:
     - cargo build -v
     - cargo test -v
