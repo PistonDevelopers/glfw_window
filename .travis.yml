@@ -8,16 +8,12 @@ env:
     global:
         - secure: OOHeOC7ZhCPV56VgnjUJJ3DNHHgBcE/mnfGzfbSgCQOafc5+Ec5bcuGuC98GqWwIjOFiMd+pD0BacZBCqsFfdsIasa/l4cm7OXtrHdK8imvpcHKGoF/8NfraZPvlpYty5dDswApRKbXM+f8zw4lg4pBrOb02HFFOeVQZoXuBkzg=
         - LD_LIBRARY_PATH: /usr/local/lib
+before_install:
+    - sudo add-apt-repository -y ppa:kalakris/cmake
+    - sudo apt-get update -qq
 install:
-    # GLFW 3
-    - sudo apt-get install libXxf86vm-dev xdotool
-    - git clone https://github.com/glfw/glfw.git
-    - cd glfw
-    - git checkout 3.0.3
-    - cmake -DCMAKE_C_FLAGS=-fPIC -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF .
-    - make
-    - sudo make install
-    - cd ..
+    # CMake, require newer version, than in Travis
+    - sudo apt-get install cmake
 script:
     - cargo build -v
     - cargo test -v

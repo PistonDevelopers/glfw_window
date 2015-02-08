@@ -1,5 +1,5 @@
 #![deny(missing_docs)]
-#![feature(collections)]
+#![feature(core)]
 
 //! A GLFW window back-end for the Piston game engine.
 
