@@ -77,8 +77,12 @@ impl GlfwWindow {
 
         // Make sure we have the right GL version.
         glfw.window_hint(glfw::WindowHint::ContextVersion(major as u32, minor as u32));
-        glfw.window_hint(glfw::WindowHint::OpenglForwardCompat(true));
-        glfw.window_hint(glfw::WindowHint::OpenglProfile(glfw::OpenGlProfileHint::Core));
+        if opengl >= OpenGL::_3_0 {
+            glfw.window_hint(glfw::WindowHint::OpenglForwardCompat(true));
+        }
+        if opengl >= OpenGL::_3_2 {
+            glfw.window_hint(glfw::WindowHint::OpenglProfile(glfw::OpenGlProfileHint::Core));
+        }
         glfw.window_hint(glfw::WindowHint::Samples(settings.samples as u32));
 
         // Create GLFW window.
