@@ -1,5 +1,4 @@
 #![deny(missing_docs)]
-#![feature(core)]
 
 //! A GLFW window back-end for the Piston game engine.
 
@@ -14,7 +13,7 @@ extern crate quack;
 use std::sync::mpsc::Receiver;
 
 // External crates.
-use std::collections::RingBuf;
+use std::collections::VecDeque;
 use glfw::Context;
 use input::{
     keyboard,
@@ -39,7 +38,7 @@ pub struct GlfwWindow {
     events: Receiver<(f64, glfw::WindowEvent)>,
     /// GLFW context.
     pub glfw: glfw::Glfw,
-    event_queue: RingBuf<input::Input>,
+    event_queue: VecDeque<input::Input>,
     // Used to compute relative mouse movement.
     last_mouse_pos: Option<(f64, f64)>,
     // The back-end does not remember the title.
@@ -60,7 +59,7 @@ impl GlfwWindow {
             events: events,
             glfw: glfw,
             exit_on_esc: exit_on_esc,
-            event_queue: RingBuf::new(),
+            event_queue: VecDeque::new(),
             last_mouse_pos: None,
             title: title.to_string(),
         }
@@ -89,7 +88,7 @@ impl GlfwWindow {
         let (mut window, events) = glfw.create_window(
             settings.size[0],
             settings.size[1],
-            &settings.title[], glfw::WindowMode::Windowed
+            &settings.title, glfw::WindowMode::Windowed
         ).expect("Failed to create GLFW window.");
         window.set_all_polling(true);
         window.make_current();
@@ -101,7 +100,7 @@ impl GlfwWindow {
             window: window,
             events: events,
             glfw: glfw,
-            event_queue: RingBuf::new(),
+            event_queue: VecDeque::new(),
             last_mouse_pos: None,
             title: settings.title,
             exit_on_esc: settings.exit_on_esc,
@@ -208,7 +207,7 @@ get:
 set:
     fn (val: CaptureCursor) [] { obj.capture_cursor(val.0) }
     fn (val: ShouldClose) [] { obj.window.set_should_close(val.0) }
-    fn (val: Title) [] { obj.window.set_title(&val.0[]) }
+    fn (val: Title) [] { obj.window.set_title(&val.0) }
     fn (val: ExitOnEsc) [] { obj.exit_on_esc = val.0 }
 action:
     fn (__: PollEvent) -> Option<Input> [] { obj.poll_event() }
