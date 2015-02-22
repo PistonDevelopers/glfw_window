@@ -11,6 +11,7 @@ extern crate input;
 extern crate quack;
 
 use std::sync::mpsc::Receiver;
+use quack::Associative;
 
 // External crates.
 use std::collections::VecDeque;
@@ -212,6 +213,10 @@ set:
 action:
     fn (__: PollEvent) -> Option<Input> [] { obj.poll_event() }
     fn (__: SwapBuffers) -> () [] { obj.window.swap_buffers() }
+}
+
+impl Associative for (PollEvent, GlfwWindow) {
+    type Type = Input;
 }
 
 fn glfw_map_key(keycode: glfw::Key) -> keyboard::Key {
