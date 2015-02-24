@@ -22,26 +22,27 @@ homepage = "https://github.com/pistondevelopers/glfw_window"
 
 [dependencies.pistoncore-window]
 git = "https://github.com/PistonDevelopers/window"
-#version = "0.0.1"
+#version = "0.0.11"
 
 [dependencies.pistoncore-input]
 git = "https://github.com/PistonDevelopers/input"
-#version = "0.0.1"
+#version = "0.0.5"
 
 [dependencies.quack]
 git = "https://github.com/PistonDevelopers/quack"
+#version = "0.0.12"
 
 [dependencies.shader_version]
 git = "https://github.com/PistonDevelopers/shader_version"
-#version = "0.0.0"
+#version = "0.0.2"
 
 [dependencies.glfw]
 git = "https://github.com/bjz/glfw-rs"
-#version = "0.0.1"
+#version = "0.0.4"
 
 [dependencies.gl]
 git = "https://github.com/bjz/gl-rs"
-#version = "0.0.2"
+#version = "0.0.8"
 
 [lib]
 
