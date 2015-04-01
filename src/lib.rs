@@ -10,11 +10,10 @@ extern crate input;
 #[macro_use]
 extern crate quack;
 
-use std::sync::mpsc::Receiver;
-use quack::Associative;
-
 // External crates.
+use std::sync::mpsc::Receiver;
 use std::collections::VecDeque;
+use quack::Associative;
 use glfw::Context;
 use input::{
     keyboard,
@@ -24,12 +23,20 @@ use input::{
     Motion,
 };
 use window::{
+    OpenGLWindow,
+    ProcAddress,
     WindowSettings,
-    ShouldClose, Size, PollEvent, SwapBuffers,
-    CaptureCursor, DrawSize, Title,
+    ShouldClose,
+    Size,
+    PollEvent,
+    SwapBuffers,
+    CaptureCursor,
+    DrawSize,
+    Title,
     ExitOnEsc
 };
-use shader_version::opengl::OpenGL;
+
+pub use shader_version::OpenGL;
 
 /// Contains stuff for game window.
 pub struct GlfwWindow {
@@ -94,7 +101,7 @@ impl GlfwWindow {
         window.set_all_polling(true);
         window.make_current();
 
-        // Load the OpenGL function pointers
+        // Load the OpenGL function pointers.
         gl::load_with(|s| window.get_proc_address(s));
 
         GlfwWindow {
@@ -168,7 +175,7 @@ impl GlfwWindow {
             }
         }
     }
-    
+
     fn poll_event(&mut self) -> Option<Input> {
         self.flush_messages();
 
@@ -217,6 +224,20 @@ action:
 
 impl Associative for (PollEvent, GlfwWindow) {
     type Type = Input;
+}
+
+impl OpenGLWindow for GlfwWindow {
+    fn get_proc_address(&mut self, proc_name: &str) -> ProcAddress {
+        self.window.get_proc_address(proc_name)
+    }
+
+    fn is_current(&self) -> bool {
+        self.window.is_current()
+    }
+
+    fn make_current(&mut self) {
+        self.window.make_current()
+    }
 }
 
 fn glfw_map_key(keycode: glfw::Key) -> keyboard::Key {
