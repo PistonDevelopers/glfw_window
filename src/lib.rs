@@ -4,36 +4,27 @@
 
 extern crate glfw;
 extern crate gl;
-extern crate window;
+extern crate piston;
 extern crate shader_version;
-extern crate input;
-#[macro_use]
-extern crate quack;
 
 // External crates.
 use std::sync::mpsc::Receiver;
 use std::collections::VecDeque;
-use quack::Associative;
 use glfw::Context;
-use input::{
+use piston::input::{
     keyboard,
     MouseButton,
     Button,
     Input,
     Motion,
 };
-use window::{
+use piston::window::{
+    Window,
+    AdvancedWindow,
     OpenGLWindow,
     ProcAddress,
     WindowSettings,
-    ShouldClose,
-    Size,
-    PollEvent,
-    SwapBuffers,
-    CaptureCursor,
-    DrawSize,
-    Title,
-    ExitOnEsc
+    Size
 };
 
 pub use shader_version::OpenGL;
@@ -46,7 +37,7 @@ pub struct GlfwWindow {
     events: Receiver<(f64, glfw::WindowEvent)>,
     /// GLFW context.
     pub glfw: glfw::Glfw,
-    event_queue: VecDeque<input::Input>,
+    event_queue: VecDeque<Input>,
     // Used to compute relative mouse movement.
     last_mouse_pos: Option<(f64, f64)>,
     // The back-end does not remember the title.
@@ -90,13 +81,13 @@ impl GlfwWindow {
         if opengl >= OpenGL::_3_2 {
             glfw.window_hint(glfw::WindowHint::OpenglProfile(glfw::OpenGlProfileHint::Core));
         }
-        glfw.window_hint(glfw::WindowHint::Samples(settings.samples as u32));
+        glfw.window_hint(glfw::WindowHint::Samples(settings.get_samples() as u32));
 
         // Create GLFW window.
         let (mut window, events) = glfw.create_window(
-            settings.size[0],
-            settings.size[1],
-            &settings.title, glfw::WindowMode::Windowed
+            settings.get_size().width,
+            settings.get_size().height,
+            &settings.get_title(), glfw::WindowMode::Windowed
         ).expect("Failed to create GLFW window.");
         window.set_all_polling(true);
         window.make_current();
@@ -110,14 +101,14 @@ impl GlfwWindow {
             glfw: glfw,
             event_queue: VecDeque::new(),
             last_mouse_pos: None,
-            title: settings.title,
-            exit_on_esc: settings.exit_on_esc,
+            title: settings.get_title(),
+            exit_on_esc: settings.get_exit_on_esc(),
         }
     }
 
     fn flush_messages(&mut self) {
         if self.event_queue.len() != 0 {
-            return;
+            return
         }
 
         self.glfw.poll_events();
@@ -153,13 +144,11 @@ impl GlfwWindow {
                 glfw::WindowEvent::CursorPos(x, y) => {
                     self.event_queue.push_back(Input::Move(Motion::MouseCursor(x, y)));
                     match self.last_mouse_pos {
-                        Some((lx, ly)) => {
-                            self.event_queue.push_back(
-                                Input::Move(Motion::MouseRelative(x - lx, y - ly))
-                            )
-                        }
-                        None => {}
-                    };
+                        Some((lx, ly)) => self.event_queue.push_back(
+                            Input::Move(Motion::MouseRelative(x - lx, y - ly))
+                        ),
+                        None => ()
+                    }
                     self.last_mouse_pos = Some((x, y));
                 }
                 glfw::WindowEvent::Scroll(x, y) => {
@@ -171,7 +160,7 @@ impl GlfwWindow {
                 glfw::WindowEvent::Focus(focus) => {
                     self.event_queue.push_back(Input::Focus(focus));
                 }
-                _ => {}
+                _ => ()
             }
         }
     }
@@ -188,7 +177,7 @@ impl GlfwWindow {
 
     fn capture_cursor(&mut self, enabled: bool) {
         if enabled {
-            self.window.set_cursor_mode(glfw::CursorMode::Disabled)
+            self.window.set_cursor_mode(glfw::CursorMode::Disabled);
         } else {
             self.window.set_cursor_mode(glfw::CursorMode::Normal);
             self.last_mouse_pos = None;
@@ -196,34 +185,52 @@ impl GlfwWindow {
     }
 }
 
-quack! {
-obj: GlfwWindow[]
-get:
-    fn () -> Size [] {
-        let (w, h) = obj.window.get_size();
-        Size([w as u32, h as u32])
+impl Window for GlfwWindow {
+    type Event = Input;
+
+    fn size(&self) -> Size {
+        let (w, h) = self.window.get_size();
+        Size { width: w as u32, height: h as u32 }
     }
-    fn () -> ShouldClose [] {
-        ShouldClose(obj.window.should_close())
+
+    fn should_close(&self) -> bool {
+        self.window.should_close()
     }
-    fn () -> DrawSize [] {
-        let (w, h) = obj.window.get_framebuffer_size();
-        DrawSize([w as u32, h as u32])
+
+    fn swap_buffers(&mut self) {
+        self.window.swap_buffers()
     }
-    fn () -> Title [] { Title(obj.title.clone()) }
-    fn () -> ExitOnEsc [] { ExitOnEsc(obj.exit_on_esc) }
-set:
-    fn (val: CaptureCursor) [] { obj.capture_cursor(val.0) }
-    fn (val: ShouldClose) [] { obj.window.set_should_close(val.0) }
-    fn (val: Title) [] { obj.window.set_title(&val.0) }
-    fn (val: ExitOnEsc) [] { obj.exit_on_esc = val.0 }
-action:
-    fn (__: PollEvent) -> Option<Input> [] { obj.poll_event() }
-    fn (__: SwapBuffers) -> () [] { obj.window.swap_buffers() }
+
+    fn poll_event(&mut self) -> Option<Input> {
+        self.poll_event()
+    }
 }
 
-impl Associative for (PollEvent, GlfwWindow) {
-    type Type = Input;
+impl AdvancedWindow for GlfwWindow {
+    fn draw_size(&self) -> Size {
+        let (w, h) = self.window.get_framebuffer_size();
+        Size { width: w as u32, height: h as u32 }
+    }
+
+    fn get_title(&self) -> String {
+        self.title.clone()
+    }
+
+    fn set_title(&mut self, value: String) {
+        self.window.set_title(&value)
+    }
+
+    fn get_exit_on_esc(&self) -> bool {
+        self.exit_on_esc
+    }
+
+    fn set_exit_on_esc(&mut self, value: bool) {
+        self.exit_on_esc = value
+    }
+
+    fn set_capture_cursor(&mut self, value: bool) {
+        self.capture_cursor(value)
+    }
 }
 
 impl OpenGLWindow for GlfwWindow {
@@ -241,7 +248,7 @@ impl OpenGLWindow for GlfwWindow {
 }
 
 fn glfw_map_key(keycode: glfw::Key) -> keyboard::Key {
-    use input::keyboard::Key;
+    use piston::input::keyboard::Key;
 
     match keycode {
         glfw::Key::Num0 => Key::D0,
