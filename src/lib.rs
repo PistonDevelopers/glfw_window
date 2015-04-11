@@ -192,6 +192,11 @@ impl Window for GlfwWindow {
         let (w, h) = self.window.get_size();
         Size { width: w as u32, height: h as u32 }
     }
+    
+    fn draw_size(&self) -> Size {
+        let (w, h) = self.window.get_framebuffer_size();
+        Size { width: w as u32, height: h as u32 }
+    }
 
     fn should_close(&self) -> bool {
         self.window.should_close()
@@ -207,11 +212,6 @@ impl Window for GlfwWindow {
 }
 
 impl AdvancedWindow for GlfwWindow {
-    fn draw_size(&self) -> Size {
-        let (w, h) = self.window.get_framebuffer_size();
-        Size { width: w as u32, height: h as u32 }
-    }
-
     fn get_title(&self) -> String {
         self.title.clone()
     }
