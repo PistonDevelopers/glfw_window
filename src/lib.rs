@@ -77,9 +77,9 @@ impl GlfwWindow {
         glfw.window_hint(glfw::WindowHint::ContextVersion(major as u32, minor as u32));
         if opengl >= OpenGL::_3_2 {
             if cfg!(target_os = "macos") {
-                glfw.window_hint(glfw::WindowHint::OpenglForwardCompat(true));
+                glfw.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
             }
-            glfw.window_hint(glfw::WindowHint::OpenglProfile(glfw::OpenGlProfileHint::Core));
+            glfw.window_hint(glfw::WindowHint::OpenGlProfile(glfw::OpenGlProfileHint::Core));
         }
         if settings.get_samples() != 0 {
             glfw.window_hint(glfw::WindowHint::Samples(settings.get_samples() as u32));
