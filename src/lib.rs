@@ -85,12 +85,6 @@ impl GlfwWindow {
             glfw.window_hint(glfw::WindowHint::Samples(settings.get_samples() as u32));
         }
 
-        if settings.get_vsync() {
-            glfw.set_swap_interval(1);
-        } else {
-            glfw.set_swap_interval(0);
-        }
-
         // Create GLFW window.
         let (mut window, events) = glfw.create_window(
             settings.get_size().width,
@@ -99,6 +93,12 @@ impl GlfwWindow {
         ).expect("Failed to create GLFW window.");
         window.set_all_polling(true);
         window.make_current();
+        
+        if settings.get_vsync() {
+            glfw.set_swap_interval(1);
+        } else {
+            glfw.set_swap_interval(0);
+        }
 
         // Load the OpenGL function pointers.
         gl::load_with(|s| window.get_proc_address(s));
