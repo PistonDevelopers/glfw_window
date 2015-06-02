@@ -65,12 +65,13 @@ impl GlfwWindow {
     }
 
     /// Creates a new game window for GLFW.
-    pub fn new(opengl: OpenGL, settings: WindowSettings) -> GlfwWindow {
+    pub fn new(settings: WindowSettings) -> GlfwWindow {
         use glfw::Context;
 
         // Initialize GLFW.
         let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
 
+        let opengl = settings.get_maybe_opengl().unwrap_or(OpenGL::_3_2);
         let (major, minor) = opengl.get_major_minor();
 
         // Make sure we have the right GL version.
@@ -190,6 +191,12 @@ impl GlfwWindow {
             self.window.set_cursor_mode(glfw::CursorMode::Normal);
             self.last_mouse_pos = None;
         }
+    }
+}
+
+impl From<WindowSettings> for GlfwWindow {
+    fn from(settings: WindowSettings) -> GlfwWindow {
+        GlfwWindow::new(settings)
     }
 }
 
