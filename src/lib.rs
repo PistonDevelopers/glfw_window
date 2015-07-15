@@ -71,12 +71,12 @@ impl GlfwWindow {
         // Initialize GLFW.
         let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
 
-        let opengl = settings.get_maybe_opengl().unwrap_or(OpenGL::_3_2);
+        let opengl = settings.get_maybe_opengl().unwrap_or(OpenGL::V3_2);
         let (major, minor) = opengl.get_major_minor();
 
         // Make sure we have the right GL version.
         glfw.window_hint(glfw::WindowHint::ContextVersion(major as u32, minor as u32));
-        if opengl >= OpenGL::_3_2 {
+        if opengl >= OpenGL::V3_2 {
             if cfg!(target_os = "macos") {
                 glfw.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
             }
