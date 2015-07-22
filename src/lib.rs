@@ -4,21 +4,22 @@
 
 extern crate glfw;
 extern crate gl;
-extern crate piston;
+extern crate input;
+extern crate window;
 extern crate shader_version;
 
 // External crates.
 use std::sync::mpsc::Receiver;
 use std::collections::VecDeque;
 use glfw::Context;
-use piston::input::{
+use input::{
     keyboard,
     MouseButton,
     Button,
     Input,
     Motion,
 };
-use piston::window::{
+use window::{
     Window,
     AdvancedWindow,
     OpenGLWindow,
@@ -263,7 +264,7 @@ impl OpenGLWindow for GlfwWindow {
 }
 
 fn glfw_map_key(keycode: glfw::Key) -> keyboard::Key {
-    use piston::input::keyboard::Key;
+    use input::Key;
 
     match keycode {
         glfw::Key::Num0 => Key::D0,
