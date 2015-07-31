@@ -95,7 +95,7 @@ impl GlfwWindow {
         ).expect("Failed to create GLFW window.");
         window.set_all_polling(true);
         window.make_current();
-        
+
         if settings.get_vsync() {
             glfw.set_swap_interval(1);
         } else {
@@ -208,10 +208,14 @@ impl Window for GlfwWindow {
         let (w, h) = self.window.get_size();
         Size { width: w as u32, height: h as u32 }
     }
-    
+
     fn draw_size(&self) -> Size {
         let (w, h) = self.window.get_framebuffer_size();
         Size { width: w as u32, height: h as u32 }
+    }
+
+    fn set_should_close(&mut self, value: bool) {
+       self.window.set_should_close(value);
     }
 
     fn should_close(&self) -> bool {
