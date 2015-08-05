@@ -20,6 +20,7 @@ use input::{
     Motion,
 };
 use window::{
+    BuildFromWindowSettings,
     Window,
     AdvancedWindow,
     OpenGLWindow,
@@ -66,11 +67,12 @@ impl GlfwWindow {
     }
 
     /// Creates a new game window for GLFW.
-    pub fn new(settings: WindowSettings) -> GlfwWindow {
+    pub fn new(settings: WindowSettings) -> Result<GlfwWindow, String> {
         use glfw::Context;
 
         // Initialize GLFW.
-        let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
+        let mut glfw = try!(glfw::init(glfw::FAIL_ON_ERRORS)
+            .map_err(|e| format!("{}", e)));
 
         let opengl = settings.get_maybe_opengl().unwrap_or(OpenGL::V3_2);
         let (major, minor) = opengl.get_major_minor();
@@ -88,11 +90,11 @@ impl GlfwWindow {
         }
 
         // Create GLFW window.
-        let (mut window, events) = glfw.create_window(
+        let (mut window, events) = try!(glfw.create_window(
             settings.get_size().width,
             settings.get_size().height,
             &settings.get_title(), glfw::WindowMode::Windowed
-        ).expect("Failed to create GLFW window.");
+        ).ok_or("Failed to create GLFW window."));
         window.set_all_polling(true);
         window.make_current();
 
@@ -105,7 +107,7 @@ impl GlfwWindow {
         // Load the OpenGL function pointers.
         gl::load_with(|s| window.get_proc_address(s));
 
-        GlfwWindow {
+        Ok(GlfwWindow {
             window: window,
             events: events,
             glfw: glfw,
@@ -113,7 +115,7 @@ impl GlfwWindow {
             last_mouse_pos: None,
             title: settings.get_title(),
             exit_on_esc: settings.get_exit_on_esc(),
-        }
+        })
     }
 
     fn flush_messages(&mut self) {
@@ -195,8 +197,9 @@ impl GlfwWindow {
     }
 }
 
-impl From<WindowSettings> for GlfwWindow {
-    fn from(settings: WindowSettings) -> GlfwWindow {
+impl BuildFromWindowSettings for GlfwWindow {
+    fn build_from_window_settings(settings: WindowSettings)
+    -> Result<GlfwWindow, String> {
         GlfwWindow::new(settings)
     }
 }
