@@ -172,6 +172,9 @@ impl GlfwWindow {
                 glfw::WindowEvent::Focus(focus) => {
                     self.event_queue.push_back(Input::Focus(focus));
                 }
+                glfw::WindowEvent::CursorEnter(cursor) => {
+                    self.event_queue.push_back(Input::Cursor(cursor));
+                }
                 _ => ()
             }
         }
