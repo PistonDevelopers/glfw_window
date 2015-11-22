@@ -261,7 +261,7 @@ impl AdvancedWindow for GlfwWindow {
 
 impl OpenGLWindow for GlfwWindow {
     fn get_proc_address(&mut self, proc_name: &str) -> ProcAddress {
-        self.window.get_proc_address(proc_name)
+        self.window.get_proc_address(proc_name) as *const _
     }
 
     fn is_current(&self) -> bool {
