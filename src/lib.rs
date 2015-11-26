@@ -105,7 +105,7 @@ impl GlfwWindow {
         }
 
         // Load the OpenGL function pointers.
-        gl::load_with(|s| window.get_proc_address(s));
+        gl::load_with(|s| window.get_proc_address(s) as *const _);
 
         Ok(GlfwWindow {
             window: window,
