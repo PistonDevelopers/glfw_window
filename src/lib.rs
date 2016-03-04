@@ -79,6 +79,8 @@ impl GlfwWindow {
 
         // Make sure we have the right GL version.
         glfw.window_hint(glfw::WindowHint::ContextVersion(major as u32, minor as u32));
+        // Set sRGB.
+        glfw.window_hint(glfw::WindowHint::SRgbCapable(settings.get_srgb()));
         if opengl >= OpenGL::V3_2 {
             if cfg!(target_os = "macos") {
                 glfw.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
