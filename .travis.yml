@@ -3,7 +3,6 @@ notifications:
     irc: "irc.mozilla.org#piston-internals"
 os:
     - linux
-    - osx
 env:
     global:
         - secure: OOHeOC7ZhCPV56VgnjUJJ3DNHHgBcE/mnfGzfbSgCQOafc5+Ec5bcuGuC98GqWwIjOFiMd+pD0BacZBCqsFfdsIasa/l4cm7OXtrHdK8imvpcHKGoF/8NfraZPvlpYty5dDswApRKbXM+f8zw4lg4pBrOb02HFFOeVQZoXuBkzg=
