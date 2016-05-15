@@ -9,17 +9,14 @@ Maintainers: @TyOverby, @bvssvni, @Coeuvre
 ### How to create a window
 
 ```Rust
-let mut window = GlfwWindow::new(
-    shader_version::opengl::OpenGL_3_2,
-    WindowSettings {
-        title: "My application".to_string(),
-        size: [640, 480],
-        fullscreen: false,
-        exit_on_esc: true,
-        samples: 4,
-    }
-);
+let mut window: GlfwWindow = WindowSettings::new("GLFW Window", (640, 480))
+    .fullscreen(false)
+    .vsync(true)
+    .build()
+    .unwrap();
 ```
+
+See the examples for more ways to create a window.
 
 ### How to set up Gfx
 
