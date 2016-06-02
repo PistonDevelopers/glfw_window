@@ -26,7 +26,8 @@ use window::{
     OpenGLWindow,
     ProcAddress,
     WindowSettings,
-    Size
+    Size,
+    Position,
 };
 
 pub use shader_version::OpenGL;
@@ -67,7 +68,7 @@ impl GlfwWindow {
     }
 
     /// Creates a new game window for GLFW.
-    pub fn new(settings: WindowSettings) -> Result<GlfwWindow, String> {
+    pub fn new(settings: &WindowSettings) -> Result<GlfwWindow, String> {
         use glfw::Context;
 
         // Initialize GLFW.
@@ -203,8 +204,7 @@ impl GlfwWindow {
 }
 
 impl BuildFromWindowSettings for GlfwWindow {
-    fn build_from_window_settings(settings: WindowSettings)
-    -> Result<GlfwWindow, String> {
+    fn build_from_window_settings(settings: &WindowSettings) -> Result<GlfwWindow, String> {
         GlfwWindow::new(settings)
     }
 }
@@ -258,6 +258,20 @@ impl AdvancedWindow for GlfwWindow {
 
     fn set_capture_cursor(&mut self, value: bool) {
         self.capture_cursor(value)
+    }
+
+    fn show(&mut self) { self.window.show(); }
+
+    fn hide(&mut self) { self.window.hide(); }
+
+    fn get_position(&self) -> Option<Position> {
+        let (x, y) = self.window.get_pos();
+        Some(Position { x: x, y: y })
+    }
+
+    fn set_position<P: Into<Position>>(&mut self, pos: P) {
+        let pos: Position = pos.into();
+        self.window.set_pos(pos.x, pos.y);
     }
 }
 
