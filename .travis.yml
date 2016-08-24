@@ -8,7 +8,8 @@ env:
         - secure: OOHeOC7ZhCPV56VgnjUJJ3DNHHgBcE/mnfGzfbSgCQOafc5+Ec5bcuGuC98GqWwIjOFiMd+pD0BacZBCqsFfdsIasa/l4cm7OXtrHdK8imvpcHKGoF/8NfraZPvlpYty5dDswApRKbXM+f8zw4lg4pBrOb02HFFOeVQZoXuBkzg=
         - LD_LIBRARY_PATH: /usr/local/lib
 before_install:
-    - sudo add-apt-repository -y ppa:kalakris/cmake
+    # install a newer cmake since at this time Travis only has version 2.8.7
+    - yes | sudo add-apt-repository ppa:kubuntu-ppa/backports
     - sudo apt-get update -qq
 install:
     # CMake, require newer version, than in Travis
