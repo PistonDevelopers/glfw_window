@@ -80,6 +80,8 @@ impl GlfwWindow {
 
         // Make sure we have the right GL version.
         glfw.window_hint(glfw::WindowHint::ContextVersion(major as u32, minor as u32));
+        glfw.window_hint(glfw::WindowHint::Resizable(settings.get_resizable()));
+        glfw.window_hint(glfw::WindowHint::Decorated(settings.get_decorated()));
         // Set sRGB.
         glfw.window_hint(glfw::WindowHint::SRgbCapable(settings.get_srgb()));
         if opengl >= OpenGL::V3_2 {
