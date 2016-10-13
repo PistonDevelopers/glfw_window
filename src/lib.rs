@@ -10,6 +10,7 @@ extern crate shader_version;
 
 // External crates.
 use std::sync::mpsc::Receiver;
+use std::time::Duration;
 use std::collections::VecDeque;
 use glfw::Context;
 use input::{
@@ -124,11 +125,6 @@ impl GlfwWindow {
     }
 
     fn flush_messages(&mut self) {
-        if self.event_queue.len() != 0 {
-            return
-        }
-
-        self.glfw.poll_events();
         for (_, event) in glfw::flush_messages(&self.events) {
             match event {
                 glfw::WindowEvent::Key(glfw::Key::Escape, _, glfw::Action::Press, _)
@@ -185,14 +181,31 @@ impl GlfwWindow {
         }
     }
 
-    fn poll_event(&mut self) -> Option<Input> {
-        self.flush_messages();
-
-        if self.event_queue.len() != 0 {
-            self.event_queue.pop_front()
-        } else {
-            None
+    fn wait_event(&mut self) -> Input {
+        loop {
+            self.glfw.wait_events();
+            self.flush_messages();
+            if let Some(event) = self.event_queue.pop_front() {
+                return event;
+            }
         }
+    }
+
+    fn wait_event_timeout(&mut self, timeout: Duration) -> Option<Input> {
+        if self.event_queue.len() == 0 {
+            let timeout_secs = timeout.as_secs() as f64 + (timeout.subsec_nanos() as f64 / 1_000_000_000.0);
+            self.glfw.wait_events_timeout(timeout_secs);
+            self.flush_messages();
+        }
+        self.event_queue.pop_front()
+    }
+
+    fn poll_event(&mut self) -> Option<Input> {
+        if self.event_queue.len() == 0 {
+            self.glfw.poll_events();
+            self.flush_messages();
+        }
+        self.event_queue.pop_front()
     }
 
     fn capture_cursor(&mut self, enabled: bool) {
@@ -234,6 +247,14 @@ impl Window for GlfwWindow {
 
     fn swap_buffers(&mut self) {
         self.window.swap_buffers()
+    }
+
+    fn wait_event(&mut self) -> Input {
+        self.wait_event()
+    }
+
+    fn wait_event_timeout(&mut self, timeout: Duration) -> Option<Input> {
+        self.wait_event_timeout(timeout)
     }
 
     fn poll_event(&mut self) -> Option<Input> {
