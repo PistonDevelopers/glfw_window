@@ -70,7 +70,7 @@ impl GlfwWindow {
 
     /// Creates a new game window for GLFW.
     pub fn new(settings: &WindowSettings) -> Result<GlfwWindow, String> {
-        use glfw::Context;
+        use glfw::{Context, SwapInterval};
 
         // Initialize GLFW.
         let mut glfw = try!(glfw::init(glfw::FAIL_ON_ERRORS)
@@ -92,7 +92,7 @@ impl GlfwWindow {
             glfw.window_hint(glfw::WindowHint::OpenGlProfile(glfw::OpenGlProfileHint::Core));
         }
         if settings.get_samples() != 0 {
-            glfw.window_hint(glfw::WindowHint::Samples(settings.get_samples() as u32));
+            glfw.window_hint(glfw::WindowHint::Samples(Some(settings.get_samples() as u32)));
         }
 
         // Create GLFW window.
@@ -105,9 +105,9 @@ impl GlfwWindow {
         window.make_current();
 
         if settings.get_vsync() {
-            glfw.set_swap_interval(1);
+            glfw.set_swap_interval(SwapInterval::Sync(1));
         } else {
-            glfw.set_swap_interval(0);
+            glfw.set_swap_interval(SwapInterval::None);
         }
 
         // Load the OpenGL function pointers.
@@ -438,7 +438,7 @@ fn glfw_map_key(keycode: glfw::Key) -> keyboard::Key {
         glfw::Key::Up => Key::Up,
         glfw::Key::World1 => Key::Unknown,
         glfw::Key::World2 => Key::Unknown,
-        // _ => keyboard::Unknown,
+        glfw::Key::Unknown => Key::Unknown,
     }
 }
 
