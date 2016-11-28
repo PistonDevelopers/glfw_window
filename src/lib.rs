@@ -131,6 +131,9 @@ impl GlfwWindow {
                 if self.exit_on_esc => {
                     self.window.set_should_close(true);
                 }
+                glfw::WindowEvent::Close => {
+                    self.event_queue.push_back(Input::Close);
+                }
                 glfw::WindowEvent::Char(ch) => {
                     self.event_queue.push_back(Input::Text(ch.to_string()));
                 }
