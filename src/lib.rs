@@ -15,6 +15,7 @@ use std::collections::VecDeque;
 use glfw::Context;
 use input::{
     keyboard,
+    CloseArgs,
     MouseButton,
     Button,
     Input,
@@ -132,7 +133,7 @@ impl GlfwWindow {
                     self.window.set_should_close(true);
                 }
                 glfw::WindowEvent::Close => {
-                    self.event_queue.push_back(Input::Close);
+                    self.event_queue.push_back(Input::Close(CloseArgs));
                 }
                 glfw::WindowEvent::Char(ch) => {
                     self.event_queue.push_back(Input::Text(ch.to_string()));
@@ -228,8 +229,6 @@ impl BuildFromWindowSettings for GlfwWindow {
 }
 
 impl Window for GlfwWindow {
-    type Event = Input;
-
     fn size(&self) -> Size {
         let (w, h) = self.window.get_size();
         Size { width: w as u32, height: h as u32 }
