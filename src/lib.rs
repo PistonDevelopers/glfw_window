@@ -187,8 +187,10 @@ impl GlfwWindow {
 
     fn wait_event(&mut self) -> Input {
         loop {
-            self.glfw.wait_events();
-            self.flush_messages();
+            if self.event_queue.len() == 0 {
+                self.glfw.wait_events();
+                self.flush_messages();
+            }
             if let Some(event) = self.event_queue.pop_front() {
                 return event;
             }
