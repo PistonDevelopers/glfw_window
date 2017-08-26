@@ -15,6 +15,8 @@ use std::collections::VecDeque;
 use glfw::Context;
 use input::{
     keyboard,
+    ButtonArgs,
+    ButtonState,
     CloseArgs,
     MouseButton,
     Button,
@@ -138,24 +140,40 @@ impl GlfwWindow {
                 glfw::WindowEvent::Char(ch) => {
                     self.event_queue.push_back(Input::Text(ch.to_string()));
                 }
-                glfw::WindowEvent::Key(key, _, glfw::Action::Press, _) => {
+                glfw::WindowEvent::Key(key, scancode, glfw::Action::Press, _) => {
                     self.event_queue.push_back(
-                        Input::Press(Button::Keyboard(glfw_map_key(key)))
+                        Input::Button(ButtonArgs {
+                            state: ButtonState::Press,
+                            button: Button::Keyboard(glfw_map_key(key)),
+                            scancode: Some(scancode as i32),
+                        })
                     );
                 }
-                glfw::WindowEvent::Key(key, _, glfw::Action::Release, _) => {
+                glfw::WindowEvent::Key(key, scancode, glfw::Action::Release, _) => {
                     self.event_queue.push_back(
-                        Input::Release(Button::Keyboard(glfw_map_key(key)))
+                        Input::Button(ButtonArgs {
+                            state: ButtonState::Release,
+                            button: Button::Keyboard(glfw_map_key(key)),
+                            scancode: Some(scancode as i32),
+                        })
                     );
                 }
                 glfw::WindowEvent::MouseButton(button, glfw::Action::Press, _) => {
                     self.event_queue.push_back(
-                        Input::Press(Button::Mouse(glfw_map_mouse(button)))
+                        Input::Button(ButtonArgs {
+                            state: ButtonState::Press,
+                            button: Button::Mouse(glfw_map_mouse(button)),
+                            scancode: None,
+                        })
                     );
                 }
                 glfw::WindowEvent::MouseButton(button, glfw::Action::Release, _) => {
                     self.event_queue.push_back(
-                        Input::Release(Button::Mouse(glfw_map_mouse(button)))
+                        Input::Button(ButtonArgs {
+                            state: ButtonState::Release,
+                            button: Button::Mouse(glfw_map_mouse(button)),
+                            scancode: None,
+                        })
                     );
                 }
                 glfw::WindowEvent::CursorPos(x, y) => {
