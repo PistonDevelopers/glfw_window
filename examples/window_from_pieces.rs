@@ -1,7 +1,6 @@
 
 extern crate glfw;
 extern crate glfw_window;
-extern crate window;
 
 use glfw::Context;
 use glfw_window::GlfwWindow;

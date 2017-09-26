@@ -1,6 +1,5 @@
 
 extern crate glfw_window;
-extern crate shader_version;
 extern crate window;
 
 use glfw_window::GlfwWindow;
