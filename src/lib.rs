@@ -318,6 +318,11 @@ impl AdvancedWindow for GlfwWindow {
         let pos: Position = pos.into();
         self.window.set_pos(pos.x, pos.y);
     }
+
+    fn set_size<S: Into<Size>>(&mut self, size: S) {
+        let size: Size = size.into();
+        self.window.set_size(size.width as i32, size.height as i32);
+    }
 }
 
 impl OpenGLWindow for GlfwWindow {
