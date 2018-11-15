@@ -100,8 +100,8 @@ impl GlfwWindow {
 
         // Create GLFW window.
         let (mut window, events) = try!(glfw.create_window(
-            settings.get_size().width,
-            settings.get_size().height,
+            settings.get_size().width as u32,
+            settings.get_size().height as u32,
             &settings.get_title(), glfw::WindowMode::Windowed
         ).ok_or("Failed to create GLFW window."));
         window.set_all_polling(true);
@@ -190,7 +190,7 @@ impl GlfwWindow {
                     self.event_queue.push_back(Input::Move(Motion::MouseScroll(x, y)));
                 }
                 glfw::WindowEvent::Size(w, h) => {
-                    self.event_queue.push_back(Input::Resize(w as u32, h as u32));
+                    self.event_queue.push_back(Input::Resize(w as f64, h as f64));
                 }
                 glfw::WindowEvent::Focus(focus) => {
                     self.event_queue.push_back(Input::Focus(focus));
@@ -251,12 +251,12 @@ impl BuildFromWindowSettings for GlfwWindow {
 impl Window for GlfwWindow {
     fn size(&self) -> Size {
         let (w, h) = self.window.get_size();
-        Size { width: w as u32, height: h as u32 }
+        Size { width: w as f64, height: h as f64 }
     }
 
     fn draw_size(&self) -> Size {
         let (w, h) = self.window.get_framebuffer_size();
-        Size { width: w as u32, height: h as u32 }
+        Size { width: w as f64, height: h as f64 }
     }
 
     fn set_should_close(&mut self, value: bool) {
