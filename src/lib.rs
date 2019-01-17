@@ -12,6 +12,7 @@ extern crate shader_version;
 use std::sync::mpsc::Receiver;
 use std::time::Duration;
 use std::collections::VecDeque;
+use std::error::Error;
 use glfw::Context;
 use input::{
     keyboard,
@@ -72,12 +73,11 @@ impl GlfwWindow {
     }
 
     /// Creates a new game window for GLFW.
-    pub fn new(settings: &WindowSettings) -> Result<GlfwWindow, String> {
+    pub fn new(settings: &WindowSettings) -> Result<GlfwWindow, Box<Error>> {
         use glfw::{Context, SwapInterval};
 
         // Initialize GLFW.
-        let mut glfw = try!(glfw::init(glfw::FAIL_ON_ERRORS)
-            .map_err(|e| format!("{}", e)));
+        let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS)?;
 
         let opengl = settings.get_maybe_opengl().unwrap_or(OpenGL::V3_2);
         let (major, minor) = opengl.get_major_minor();
@@ -99,11 +99,11 @@ impl GlfwWindow {
         }
 
         // Create GLFW window.
-        let (mut window, events) = try!(glfw.create_window(
+        let (mut window, events) = glfw.create_window(
             settings.get_size().width as u32,
             settings.get_size().height as u32,
             &settings.get_title(), glfw::WindowMode::Windowed
-        ).ok_or("Failed to create GLFW window."));
+        ).ok_or("Failed to create GLFW window.")?;
         window.set_all_polling(true);
         window.make_current();
 
@@ -243,7 +243,7 @@ impl GlfwWindow {
 }
 
 impl BuildFromWindowSettings for GlfwWindow {
-    fn build_from_window_settings(settings: &WindowSettings) -> Result<GlfwWindow, String> {
+    fn build_from_window_settings(settings: &WindowSettings) -> Result<GlfwWindow, Box<Error>> {
         GlfwWindow::new(settings)
     }
 }
