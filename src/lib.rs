@@ -51,6 +51,7 @@ pub struct GlfwWindow {
     // The back-end does not remember the title.
     title: String,
     exit_on_esc: bool,
+    automatic_close: bool,
 }
 
 impl GlfwWindow {
@@ -69,6 +70,7 @@ impl GlfwWindow {
             event_queue: VecDeque::new(),
             last_mouse_pos: None,
             title: title.to_string(),
+            automatic_close: true,
         }
     }
 
@@ -124,6 +126,7 @@ impl GlfwWindow {
             last_mouse_pos: None,
             title: settings.get_title(),
             exit_on_esc: settings.get_exit_on_esc(),
+            automatic_close: settings.get_automatic_close(),
         })
     }
 
@@ -135,6 +138,9 @@ impl GlfwWindow {
                     self.window.set_should_close(true);
                 }
                 glfw::WindowEvent::Close => {
+                    if !self.automatic_close {
+                        self.window.set_should_close(false);
+                    }
                     self.event_queue.push_back(Input::Close(CloseArgs));
                 }
                 glfw::WindowEvent::Char(ch) => {
@@ -291,6 +297,14 @@ impl AdvancedWindow for GlfwWindow {
 
     fn set_title(&mut self, value: String) {
         self.window.set_title(&value)
+    }
+
+    fn get_automatic_close(&self) -> bool {
+        self.automatic_close
+    }
+
+    fn set_automatic_close(&mut self, value: bool) {
+        self.automatic_close = value;
     }
 
     fn get_exit_on_esc(&self) -> bool {
