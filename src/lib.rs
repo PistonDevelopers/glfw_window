@@ -33,6 +33,7 @@ use window::{
     WindowSettings,
     Size,
     Position,
+    Api,
 };
 
 pub use shader_version::OpenGL;
@@ -76,21 +77,23 @@ impl GlfwWindow {
 
     /// Creates a new game window for GLFW.
     pub fn new(settings: &WindowSettings) -> Result<GlfwWindow, Box<Error>> {
-        use glfw::{Context, SwapInterval};
+        use glfw::SwapInterval;
 
         // Initialize GLFW.
         let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS)?;
 
-        let opengl = settings.get_maybe_opengl().unwrap_or(OpenGL::V3_2);
-        let (major, minor) = opengl.get_major_minor();
-
+        let api = settings.get_maybe_graphics_api().unwrap_or(Api::opengl(3, 2));
+        if api.api != "OpenGL" {
+            panic!("Expected OpenGL api in window settings when creating window.")
+        };
+        
         // Make sure we have the right GL version.
-        glfw.window_hint(glfw::WindowHint::ContextVersion(major as u32, minor as u32));
+        glfw.window_hint(glfw::WindowHint::ContextVersion(api.major, api.minor));
         glfw.window_hint(glfw::WindowHint::Resizable(settings.get_resizable()));
         glfw.window_hint(glfw::WindowHint::Decorated(settings.get_decorated()));
         // Set sRGB.
         glfw.window_hint(glfw::WindowHint::SRgbCapable(settings.get_srgb()));
-        if opengl >= OpenGL::V3_2 {
+        if api >= Api::opengl(3, 2) {
             if cfg!(target_os = "macos") {
                 glfw.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
             }

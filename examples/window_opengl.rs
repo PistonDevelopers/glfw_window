@@ -12,6 +12,6 @@ fn main() {
         &WindowSettings::new("GLFW Window", (640, 480))
             .fullscreen(false)
             .vsync(true)
-            .opengl(OpenGL::V2_1) // etc
+            .graphics_api(OpenGL::V2_1) // etc
     ).unwrap();
 }
