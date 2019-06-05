@@ -34,6 +34,7 @@ use window::{
     Size,
     Position,
     Api,
+    UnsupportedGraphicsApiError,
 };
 
 pub use shader_version::OpenGL;
@@ -84,9 +85,12 @@ impl GlfwWindow {
 
         let api = settings.get_maybe_graphics_api().unwrap_or(Api::opengl(3, 2));
         if api.api != "OpenGL" {
-            panic!("Expected OpenGL api in window settings when creating window.")
+            return Err(UnsupportedGraphicsApiError {
+                found: api.api,
+                expected: vec!["OpenGL".into()]
+            }.into());
         };
-        
+
         // Make sure we have the right GL version.
         glfw.window_hint(glfw::WindowHint::ContextVersion(api.major, api.minor));
         glfw.window_hint(glfw::WindowHint::Resizable(settings.get_resizable()));
