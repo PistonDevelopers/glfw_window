@@ -23,6 +23,7 @@ use input::{
     Button,
     Input,
     Motion,
+    TimeStamp,
 };
 use window::{
     BuildFromWindowSettings,
@@ -216,33 +217,33 @@ impl GlfwWindow {
         }
     }
 
-    fn wait_event(&mut self) -> Input {
+    fn wait_event(&mut self) -> (Input, Option<TimeStamp>) {
         loop {
             if self.event_queue.len() == 0 {
                 self.glfw.wait_events();
                 self.flush_messages();
             }
             if let Some(event) = self.event_queue.pop_front() {
-                return event;
+                return (event, None);
             }
         }
     }
 
-    fn wait_event_timeout(&mut self, timeout: Duration) -> Option<Input> {
+    fn wait_event_timeout(&mut self, timeout: Duration) -> Option<(Input, Option<TimeStamp>)> {
         if self.event_queue.len() == 0 {
             let timeout_secs = timeout.as_secs() as f64 + (timeout.subsec_nanos() as f64 / 1_000_000_000.0);
             self.glfw.wait_events_timeout(timeout_secs);
             self.flush_messages();
         }
-        self.event_queue.pop_front()
+        self.event_queue.pop_front().map(|x| (x, None))
     }
 
-    fn poll_event(&mut self) -> Option<Input> {
+    fn poll_event(&mut self) -> Option<(Input, Option<TimeStamp>)> {
         if self.event_queue.len() == 0 {
             self.glfw.poll_events();
             self.flush_messages();
         }
-        self.event_queue.pop_front()
+        self.event_queue.pop_front().map(|x| (x, None))
     }
 
     fn capture_cursor(&mut self, enabled: bool) {
@@ -284,15 +285,15 @@ impl Window for GlfwWindow {
         self.window.swap_buffers()
     }
 
-    fn wait_event(&mut self) -> Input {
+    fn wait_event(&mut self) -> (Input, Option<TimeStamp>) {
         self.wait_event()
     }
 
-    fn wait_event_timeout(&mut self, timeout: Duration) -> Option<Input> {
+    fn wait_event_timeout(&mut self, timeout: Duration) -> Option<(Input, Option<TimeStamp>)> {
         self.wait_event_timeout(timeout)
     }
 
-    fn poll_event(&mut self) -> Option<Input> {
+    fn poll_event(&mut self) -> Option<(Input, Option<TimeStamp>)> {
         self.poll_event()
     }
 }
