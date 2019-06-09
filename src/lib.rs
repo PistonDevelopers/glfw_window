@@ -24,6 +24,7 @@ use input::{
     Input,
     Motion,
     TimeStamp,
+    ResizeArgs,
 };
 use window::{
     BuildFromWindowSettings,
@@ -191,20 +192,26 @@ impl GlfwWindow {
                     );
                 }
                 glfw::WindowEvent::CursorPos(x, y) => {
-                    self.event_queue.push_back(Input::Move(Motion::MouseCursor(x, y)));
+                    self.event_queue.push_back(Input::Move(Motion::MouseCursor([x, y])));
                     match self.last_mouse_pos {
                         Some((lx, ly)) => self.event_queue.push_back(
-                            Input::Move(Motion::MouseRelative(x - lx, y - ly))
+                            Input::Move(Motion::MouseRelative([x - lx, y - ly]))
                         ),
                         None => ()
                     }
                     self.last_mouse_pos = Some((x, y));
                 }
                 glfw::WindowEvent::Scroll(x, y) => {
-                    self.event_queue.push_back(Input::Move(Motion::MouseScroll(x, y)));
+                    self.event_queue.push_back(Input::Move(Motion::MouseScroll([x, y])));
                 }
                 glfw::WindowEvent::Size(w, h) => {
-                    self.event_queue.push_back(Input::Resize(w as f64, h as f64));
+                    let draw_size = self.draw_size();
+                    self.event_queue.push_back(Input::Resize(ResizeArgs {
+                        width: w as f64,
+                        height: h as f64,
+                        draw_width: draw_size.width as u32,
+                        draw_height: draw_size.height as u32,
+                    }));
                 }
                 glfw::WindowEvent::Focus(focus) => {
                     self.event_queue.push_back(Input::Focus(focus));
