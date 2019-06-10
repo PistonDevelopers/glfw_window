@@ -207,10 +207,8 @@ impl GlfwWindow {
                 glfw::WindowEvent::Size(w, h) => {
                     let draw_size = self.draw_size();
                     self.event_queue.push_back(Input::Resize(ResizeArgs {
-                        width: w as f64,
-                        height: h as f64,
-                        draw_width: draw_size.width as u32,
-                        draw_height: draw_size.height as u32,
+                        window_size: [w as f64, h as f64],
+                        draw_size: draw_size.into(),
                     }));
                 }
                 glfw::WindowEvent::Focus(focus) => {
