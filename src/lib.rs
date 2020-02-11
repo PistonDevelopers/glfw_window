@@ -79,7 +79,7 @@ impl GlfwWindow {
     }
 
     /// Creates a new game window for GLFW.
-    pub fn new(settings: &WindowSettings) -> Result<GlfwWindow, Box<Error>> {
+    pub fn new(settings: &WindowSettings) -> Result<GlfwWindow, Box<dyn Error>> {
         use glfw::SwapInterval;
 
         // Initialize GLFW.
@@ -262,7 +262,7 @@ impl GlfwWindow {
 }
 
 impl BuildFromWindowSettings for GlfwWindow {
-    fn build_from_window_settings(settings: &WindowSettings) -> Result<GlfwWindow, Box<Error>> {
+    fn build_from_window_settings(settings: &WindowSettings) -> Result<GlfwWindow, Box<dyn Error>> {
         GlfwWindow::new(settings)
     }
 }
