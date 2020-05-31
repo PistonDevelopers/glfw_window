@@ -97,6 +97,7 @@ impl GlfwWindow {
         glfw.window_hint(glfw::WindowHint::ContextVersion(api.major, api.minor));
         glfw.window_hint(glfw::WindowHint::Resizable(settings.get_resizable()));
         glfw.window_hint(glfw::WindowHint::Decorated(settings.get_decorated()));
+        glfw.window_hint(glfw::WindowHint::TransparentFramebuffer(settings.get_transparent()));
         // Set sRGB.
         glfw.window_hint(glfw::WindowHint::SRgbCapable(settings.get_srgb()));
         if api >= Api::opengl(3, 2) {
