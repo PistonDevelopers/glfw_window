@@ -1,7 +1,7 @@
 [package]
 
 name = "pistoncore-glfw_window"
-version = "0.70.0"
+version = "0.71.0"
 authors = [
     "bvssvni <bvssvni@gmail.com>",
     "Coeuvre <coeuvre@gmail.com>",
@@ -29,4 +29,4 @@ pistoncore-window = "0.47.0"
 pistoncore-input = "1.0.0"
 shader_version = "0.7.0"
 glfw = "0.41.0"
-gl = "0.11.0"
+gl = "0.13.0"
