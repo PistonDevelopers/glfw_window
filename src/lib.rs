@@ -25,6 +25,7 @@ use input::{
     Input,
     Motion,
     ResizeArgs,
+    FileDrag,
 };
 use window::{
     BuildFromWindowSettings,
@@ -217,6 +218,11 @@ impl GlfwWindow {
                 }
                 glfw::WindowEvent::CursorEnter(cursor) => {
                     self.event_queue.push_back(Input::Cursor(cursor));
+                }
+                glfw::WindowEvent::FileDrop(files) => {
+                    for file in files {
+                        self.event_queue.push_back(Input::FileDrag(FileDrag::Drop(file)))
+                    }
                 }
                 _ => ()
             }
