@@ -476,7 +476,7 @@ fn glfw_map_key(keycode: glfw::Key) -> keyboard::Key {
         glfw::Key::RightAlt => Key::RAlt,
         glfw::Key::RightSuper => Key::RGui,
         // Map to backslash?
-        glfw::Key::GraveAccent => Key::Unknown,
+        glfw::Key::GraveAccent => Key::Backquote,
         glfw::Key::Home => Key::Home,
         glfw::Key::Insert => Key::Insert,
         glfw::Key::Left => Key::Left,
