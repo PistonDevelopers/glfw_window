@@ -25,6 +25,7 @@ use input::{
     Input,
     Motion,
     ResizeArgs,
+    FileDrag,
 };
 use window::{
     BuildFromWindowSettings,
@@ -217,6 +218,11 @@ impl GlfwWindow {
                 }
                 glfw::WindowEvent::CursorEnter(cursor) => {
                     self.event_queue.push_back(Input::Cursor(cursor));
+                }
+                glfw::WindowEvent::FileDrop(files) => {
+                    for file in files {
+                        self.event_queue.push_back(Input::FileDrag(FileDrag::Drop(file)))
+                    }
                 }
                 _ => ()
             }
@@ -470,7 +476,7 @@ fn glfw_map_key(keycode: glfw::Key) -> keyboard::Key {
         glfw::Key::RightAlt => Key::RAlt,
         glfw::Key::RightSuper => Key::RGui,
         // Map to backslash?
-        glfw::Key::GraveAccent => Key::Unknown,
+        glfw::Key::GraveAccent => Key::Backquote,
         glfw::Key::Home => Key::Home,
         glfw::Key::Insert => Key::Insert,
         glfw::Key::Left => Key::Left,
