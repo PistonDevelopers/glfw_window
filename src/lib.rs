@@ -13,8 +13,26 @@ use std::{collections::HashMap, sync::mpsc::Receiver};
 use std::time::Duration;
 use std::collections::VecDeque;
 use std::error::Error;
-use glfw::{Context, Joystick, JoystickId};
-use input::{Button, ButtonArgs, ButtonState, CloseArgs, ControllerAxisArgs, ControllerButton, Event, FileDrag, Input, Motion, MouseButton, ResizeArgs, keyboard};
+use glfw::{
+    Context, 
+    Joystick, 
+    JoystickId
+};
+use input::{
+    Button, 
+    ButtonArgs, 
+    ButtonState, 
+    CloseArgs, 
+    ControllerAxisArgs, 
+    ControllerButton, 
+    Event, 
+    FileDrag, 
+    Input,
+    Motion, 
+    MouseButton, 
+    ResizeArgs, 
+    keyboard
+};
 use window::{
     BuildFromWindowSettings,
     Window,
@@ -87,9 +105,9 @@ impl GlfwWindow {
         GlfwWindow {
             joysticks,
             window: win,
-            events: events,
-            glfw: glfw,
-            exit_on_esc: exit_on_esc,
+            events,
+            glfw,
+            exit_on_esc,
             event_queue: VecDeque::new(),
             last_mouse_pos: None,
             title: title.to_string(),
@@ -147,7 +165,6 @@ impl GlfwWindow {
         // Load the OpenGL function pointers.
         gl::load_with(|s| window.get_proc_address(s) as *const _);
 
-
         // setup joysticks
         let mut joysticks = Vec::new();
         if settings.get_controllers() {
@@ -155,7 +172,6 @@ impl GlfwWindow {
                 joysticks.push(JoystickHelper::new(glfw.get_joystick(i)));
             }
         }
-
 
         Ok(GlfwWindow {
             joysticks,
@@ -552,8 +568,7 @@ fn glfw_map_mouse(mouse_button: glfw::MouseButton) -> MouseButton {
 }
 
 
-
-
+/// helper struct for joystick
 struct JoystickHelper {
     joystick: Joystick,
 
@@ -563,23 +578,19 @@ struct JoystickHelper {
 }
 impl JoystickHelper {
     fn new(joystick: Joystick) -> Self {
-        // load inital values
         let mut buttons = HashMap::new();
         let mut axes= HashMap::new();
 
-
+        // load inital values
         for (axis, a) in joystick.get_axes().iter().enumerate() {
             axes.insert(axis as u8, *a as f64);
         }
-        
         for (button, a) in joystick.get_buttons().iter().enumerate() {
             buttons.insert(button as u8, *a > 1);
         }
 
-
         Self {
             joystick,
-            
             buttons,
             axes
         }
@@ -587,8 +598,8 @@ impl JoystickHelper {
 
     fn update(&mut self, event_queue: &mut VecDeque<Input>) {
         if !self.joystick.is_present() {return}
-        // println!("{}: {}", j.id as u8, j.is_present());
 
+        // check axes
         for (axis, a) in self.joystick.get_axes().iter().enumerate() {
             let previous = self.axes.get_mut(&(axis as u8)).unwrap();
 
@@ -606,6 +617,7 @@ impl JoystickHelper {
             )));
         }
         
+        // check buttons
         for (button, a) in self.joystick.get_buttons().iter().enumerate() {
             let previous = self.buttons.get_mut(&(button as u8)).unwrap();
 
@@ -617,21 +629,15 @@ impl JoystickHelper {
                 *previous = *a > 0
             }
 
-            event_queue.push_back(
-                Input::Button(
-                    ButtonArgs {
-                        state: if *a > 0 {ButtonState::Press} else {ButtonState::Release},
-                        button: 
-                            Button::Controller(
-                                ControllerButton::new(
-                                self.joystick.id as u32, 
-                                button as u8
-                            )
-                        ),
-                        scancode: None
-                    }
-                )
-            );
+            // add change as event
+            event_queue.push_back(Input::Button(ButtonArgs {
+                state: if *a > 0 {ButtonState::Press} else {ButtonState::Release},
+                button: Button::Controller(ControllerButton::new(
+                    self.joystick.id as u32, 
+                    button as u8
+                )),
+                scancode: None
+            }));
         }
     }
 }
