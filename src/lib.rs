@@ -597,7 +597,6 @@ impl JoystickHelper {
 
             // was disconnected since last update
             (false, true) => {
-                println!("controller {} disconnected", self.joystick.id as u8);
                 self.connected = false;
                 // clear maps to free up memory
                 self.buttons.clear();
@@ -607,8 +606,6 @@ impl JoystickHelper {
 
             // was connected since last update
             (true, false) => {
-                println!("controller {} connected", self.joystick.id as u8);
-
                 // insert values
                 self.connected = true;
                 for (axis, a) in self.joystick.get_axes().iter().enumerate() {
