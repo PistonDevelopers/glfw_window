@@ -9,24 +9,12 @@ extern crate window;
 extern crate shader_version;
 
 // External crates.
-use std::sync::mpsc::Receiver;
+use std::{collections::HashMap, sync::mpsc::Receiver};
 use std::time::Duration;
 use std::collections::VecDeque;
 use std::error::Error;
-use glfw::Context;
-use input::{
-    keyboard,
-    ButtonArgs,
-    ButtonState,
-    CloseArgs,
-    Event,
-    MouseButton,
-    Button,
-    Input,
-    Motion,
-    ResizeArgs,
-    FileDrag,
-};
+use glfw::{Context, Joystick, JoystickId};
+use input::{Button, ButtonArgs, ButtonState, CloseArgs, ControllerAxisArgs, ControllerButton, Event, FileDrag, Input, Motion, MouseButton, ResizeArgs, keyboard};
 use window::{
     BuildFromWindowSettings,
     Window,
@@ -41,6 +29,26 @@ use window::{
 };
 
 pub use shader_version::OpenGL;
+
+// list of joysticks to check
+const JOYSTICKS:[JoystickId; 16] = [
+    JoystickId::Joystick1,
+    JoystickId::Joystick2,
+    JoystickId::Joystick3,
+    JoystickId::Joystick4,
+    JoystickId::Joystick5,
+    JoystickId::Joystick6,
+    JoystickId::Joystick7,
+    JoystickId::Joystick8,
+    JoystickId::Joystick9,
+    JoystickId::Joystick10,
+    JoystickId::Joystick11,
+    JoystickId::Joystick12,
+    JoystickId::Joystick13,
+    JoystickId::Joystick14,
+    JoystickId::Joystick15,
+    JoystickId::Joystick16,
+];
 
 /// Contains stuff for game window.
 pub struct GlfwWindow {
@@ -57,6 +65,8 @@ pub struct GlfwWindow {
     title: String,
     exit_on_esc: bool,
     automatic_close: bool,
+
+    joysticks: Vec<JoystickHelper>
 }
 
 impl GlfwWindow {
@@ -67,7 +77,15 @@ impl GlfwWindow {
         win.set_all_polling(true);
         win.make_current();
         let title = "<unknown window title, created from_pieces>";
+
+        // setup joysticks
+        let mut joysticks = Vec::new();
+        for i in JOYSTICKS {
+            joysticks.push(JoystickHelper::new(glfw.get_joystick(i)));
+        }
+
         GlfwWindow {
+            joysticks,
             window: win,
             events: events,
             glfw: glfw,
@@ -129,10 +147,21 @@ impl GlfwWindow {
         // Load the OpenGL function pointers.
         gl::load_with(|s| window.get_proc_address(s) as *const _);
 
+
+        // setup joysticks
+        let mut joysticks = Vec::new();
+        if settings.get_controllers() {
+            for i in JOYSTICKS {
+                joysticks.push(JoystickHelper::new(glfw.get_joystick(i)));
+            }
+        }
+
+
         Ok(GlfwWindow {
-            window: window,
-            events: events,
-            glfw: glfw,
+            joysticks,
+            window,
+            events,
+            glfw,
             event_queue: VecDeque::new(),
             last_mouse_pos: None,
             title: settings.get_title(),
@@ -227,6 +256,12 @@ impl GlfwWindow {
                 _ => ()
             }
         }
+
+        // println!("checking gamepads");
+        for j in self.joysticks.iter_mut() {
+            j.update(&mut self.event_queue);
+        }
+
     }
 
     fn wait_event(&mut self) -> Event {
@@ -513,5 +548,90 @@ fn glfw_map_mouse(mouse_button: glfw::MouseButton) -> MouseButton {
         glfw::MouseButton::Button6 => MouseButton::Button6,
         glfw::MouseButton::Button7 => MouseButton::Button7,
         glfw::MouseButton::Button8 => MouseButton::Button8,
+    }
+}
+
+
+
+
+struct JoystickHelper {
+    joystick: Joystick,
+
+    // states 
+    buttons: HashMap<u8, bool>,
+    axes: HashMap<u8, f64>
+}
+impl JoystickHelper {
+    fn new(joystick: Joystick) -> Self {
+        // load inital values
+        let mut buttons = HashMap::new();
+        let mut axes= HashMap::new();
+
+
+        for (axis, a) in joystick.get_axes().iter().enumerate() {
+            axes.insert(axis as u8, *a as f64);
+        }
+        
+        for (button, a) in joystick.get_buttons().iter().enumerate() {
+            buttons.insert(button as u8, *a > 1);
+        }
+
+
+        Self {
+            joystick,
+            
+            buttons,
+            axes
+        }
+    }
+
+    fn update(&mut self, event_queue: &mut VecDeque<Input>) {
+        if !self.joystick.is_present() {return}
+        // println!("{}: {}", j.id as u8, j.is_present());
+
+        for (axis, a) in self.joystick.get_axes().iter().enumerate() {
+            let previous = self.axes.get_mut(&(axis as u8)).unwrap();
+
+            if *a as f64 == *previous {
+                // if the value is the same, dont do an update
+                continue
+            } else {
+                // new value, update existing value
+                *previous = *a as f64
+            }
+
+            // add change as event
+            event_queue.push_back(Input::Move(Motion::ControllerAxis(
+                ControllerAxisArgs::new(self.joystick.id as u32, axis as u8, *a as f64)
+            )));
+        }
+        
+        for (button, a) in self.joystick.get_buttons().iter().enumerate() {
+            let previous = self.buttons.get_mut(&(button as u8)).unwrap();
+
+            if (*a > 0) == *previous {
+                // if the value is the same, dont do an update
+                continue
+            } else {
+                // new value, update existing value
+                *previous = *a > 0
+            }
+
+            event_queue.push_back(
+                Input::Button(
+                    ButtonArgs {
+                        state: if *a > 0 {ButtonState::Press} else {ButtonState::Release},
+                        button: 
+                            Button::Controller(
+                                ControllerButton::new(
+                                self.joystick.id as u32, 
+                                button as u8
+                            )
+                        ),
+                        scancode: None
+                    }
+                )
+            );
+        }
     }
 }
