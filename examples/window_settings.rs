@@ -8,6 +8,7 @@ fn main() {
     let _ = GlfwWindow::new(
         &WindowSettings::new("GLFW Window", (640, 480))
             .fullscreen(false)
-            .vsync(true) // etc
-    ).unwrap();
+            .vsync(true), // etc
+    )
+    .unwrap();
 }

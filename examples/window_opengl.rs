@@ -1,4 +1,3 @@
-
 extern crate glfw_window;
 extern crate shader_version;
 extern crate window;
@@ -12,6 +11,7 @@ fn main() {
         &WindowSettings::new("GLFW Window", (640, 480))
             .fullscreen(false)
             .vsync(true)
-            .graphics_api(OpenGL::V2_1) // etc
-    ).unwrap();
+            .graphics_api(OpenGL::V2_1), // etc
+    )
+    .unwrap();
 }
