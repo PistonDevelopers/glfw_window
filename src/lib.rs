@@ -84,6 +84,8 @@ pub struct GlfwWindow {
     exit_on_esc: bool,
     automatic_close: bool,
 
+    /// ignore controller axis inputs below this threshold
+    pub joystick_deadzone: f64,
     joysticks: Vec<JoystickHelper>
 }
 
@@ -112,6 +114,7 @@ impl GlfwWindow {
             last_mouse_pos: None,
             title: title.to_string(),
             automatic_close: true,
+            joystick_deadzone: 0.0
         }
     }
 
@@ -183,6 +186,7 @@ impl GlfwWindow {
             title: settings.get_title(),
             exit_on_esc: settings.get_exit_on_esc(),
             automatic_close: settings.get_automatic_close(),
+            joystick_deadzone: 0.0
         })
     }
 
@@ -275,7 +279,7 @@ impl GlfwWindow {
 
         // println!("checking gamepads");
         for j in self.joysticks.iter_mut() {
-            j.update(&mut self.event_queue);
+            j.update(&mut self.event_queue, self.joystick_deadzone);
         }
 
     }
@@ -589,7 +593,7 @@ impl JoystickHelper {
         }
     }
 
-    fn update(&mut self, event_queue: &mut VecDeque<Input>) {
+    fn update(&mut self, event_queue: &mut VecDeque<Input>, deadzone: f64) {
 
         match (self.joystick.is_present(), self.connected) {
             // not connected, and we know its not connected
@@ -608,6 +612,9 @@ impl JoystickHelper {
             (true, false) => {
                 // insert values
                 self.connected = true;
+
+                // only issue with this approach is a skipped input on the update the controller is connected
+                // i dont think this is a big issue though
                 for (axis, a) in self.joystick.get_axes().iter().enumerate() {
                     self.axes.insert(axis as u8, *a as f64);
                 }
@@ -615,8 +622,7 @@ impl JoystickHelper {
                     self.buttons.insert(button as u8, *a > 1);
                 }
 
-                // exit. only issue here is a skipped input on the update the controller is connected
-                // i dont think this is a big issue though
+                // exit
                 return;
             }
 
@@ -627,36 +633,38 @@ impl JoystickHelper {
         // check axes
         for (axis, a) in self.joystick.get_axes().iter().enumerate() {
             let previous = self.axes.get_mut(&(axis as u8)).unwrap();
+            let a = *a as f64;
 
-            if *a as f64 == *previous {
-                // if the value is the same, dont do an update
+            if a == *previous || a > deadzone {
+                // if the value is the same, or within the deadzone, dont do an update
                 continue
             } else {
                 // new value, update existing value
-                *previous = *a as f64
+                *previous = a
             }
 
             // add change as event
             event_queue.push_back(Input::Move(Motion::ControllerAxis(
-                ControllerAxisArgs::new(self.joystick.id as u32, axis as u8, *a as f64)
+                ControllerAxisArgs::new(self.joystick.id as u32, axis as u8, a)
             )));
         }
         
         // check buttons
         for (button, a) in self.joystick.get_buttons().iter().enumerate() {
             let previous = self.buttons.get_mut(&(button as u8)).unwrap();
+            let pressed = *a > 0;
 
-            if (*a > 0) == *previous {
+            if pressed == *previous {
                 // if the value is the same, dont do an update
                 continue
             } else {
                 // new value, update existing value
-                *previous = *a > 0
+                *previous = pressed
             }
 
             // add change as event
             event_queue.push_back(Input::Button(ButtonArgs {
-                state: if *a > 0 {ButtonState::Press} else {ButtonState::Release},
+                state: if pressed {ButtonState::Press} else {ButtonState::Release},
                 button: Button::Controller(ControllerButton::new(
                     self.joystick.id as u32, 
                     button as u8
