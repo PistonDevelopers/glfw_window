@@ -635,7 +635,7 @@ impl JoystickHelper {
             let previous = self.axes.get_mut(&(axis as u8)).unwrap();
             let a = *a as f64;
 
-            if a == *previous || a > deadzone {
+            if a == *previous || a.abs() > deadzone {
                 // if the value is the same, or within the deadzone, dont do an update
                 continue
             } else {
