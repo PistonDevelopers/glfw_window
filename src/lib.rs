@@ -570,34 +570,62 @@ fn glfw_map_mouse(mouse_button: glfw::MouseButton) -> MouseButton {
 
 /// helper struct for joystick
 struct JoystickHelper {
+    /// joystick to check
     joystick: Joystick,
 
     // states 
     buttons: HashMap<u8, bool>,
-    axes: HashMap<u8, f64>
+    axes: HashMap<u8, f64>,
+    /// last known connected state
+    connected: bool,
 }
 impl JoystickHelper {
     fn new(joystick: Joystick) -> Self {
-        let mut buttons = HashMap::new();
-        let mut axes= HashMap::new();
-
-        // load inital values
-        for (axis, a) in joystick.get_axes().iter().enumerate() {
-            axes.insert(axis as u8, *a as f64);
-        }
-        for (button, a) in joystick.get_buttons().iter().enumerate() {
-            buttons.insert(button as u8, *a > 1);
-        }
-
         Self {
             joystick,
-            buttons,
-            axes
+            connected: false,
+            buttons: HashMap::new(),
+            axes: HashMap::new(),
         }
     }
 
     fn update(&mut self, event_queue: &mut VecDeque<Input>) {
-        if !self.joystick.is_present() {return}
+
+        match (self.joystick.is_present(), self.connected) {
+            // not connected, and we know its not connected
+            (false, false) => return,
+
+            // was disconnected since last update
+            (false, true) => {
+                println!("controller {} disconnected", self.joystick.id as u8);
+                self.connected = false;
+                // clear maps to free up memory
+                self.buttons.clear();
+                self.axes.clear();
+                return;
+            }
+
+            // was connected since last update
+            (true, false) => {
+                println!("controller {} connected", self.joystick.id as u8);
+
+                // insert values
+                self.connected = true;
+                for (axis, a) in self.joystick.get_axes().iter().enumerate() {
+                    self.axes.insert(axis as u8, *a as f64);
+                }
+                for (button, a) in self.joystick.get_buttons().iter().enumerate() {
+                    self.buttons.insert(button as u8, *a > 1);
+                }
+
+                // exit. only issue here is a skipped input on the update the controller is connected
+                // i dont think this is a big issue though
+                return;
+            }
+
+            // still connected, nothing to do
+            (true, true) => {}
+        }
 
         // check axes
         for (axis, a) in self.joystick.get_axes().iter().enumerate() {
