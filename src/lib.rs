@@ -80,7 +80,7 @@ impl GlfwWindow {
 
         // setup joysticks
         let mut joysticks = Vec::new();
-        for i in JOYSTICKS {
+        for &i in &JOYSTICKS {
             joysticks.push(JoystickHelper::new(glfw.get_joystick(i)));
         }
 
@@ -163,7 +163,7 @@ impl GlfwWindow {
         // setup joysticks
         let mut joysticks = Vec::new();
         if settings.get_controllers() {
-            for i in JOYSTICKS {
+            for &i in &JOYSTICKS {
                 joysticks.push(JoystickHelper::new(glfw.get_joystick(i)));
             }
         }
