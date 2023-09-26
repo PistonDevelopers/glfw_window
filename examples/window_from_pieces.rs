@@ -6,7 +6,7 @@ use glfw::Context;
 use glfw_window::GlfwWindow;
 
 fn main() {
-    let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
+    let mut glfw = glfw::init_no_callbacks().unwrap();
     let (mut glfw_window, glfw_events) = glfw.create_window(640, 480, "GLFW Window", glfw::WindowMode::Windowed).unwrap();
     
     glfw_window.set_all_polling(true);

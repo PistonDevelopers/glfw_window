@@ -103,7 +103,7 @@ impl GlfwWindow {
         use glfw::SwapInterval;
 
         // Initialize GLFW.
-        let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS)?;
+        let mut glfw = glfw::init_no_callbacks()?;
 
         let api = settings
             .get_maybe_graphics_api()
