@@ -17,7 +17,8 @@ use input::{
 use std::collections::VecDeque;
 use std::error::Error;
 use std::time::Duration;
-use std::{collections::HashMap, sync::mpsc::Receiver};
+use std::collections::HashMap;
+use glfw::GlfwReceiver as Receiver;
 use window::{
     AdvancedWindow, Api, BuildFromWindowSettings, OpenGLWindow, Position, ProcAddress, Size,
     UnsupportedGraphicsApiError, Window, WindowSettings,
@@ -48,7 +49,7 @@ const JOYSTICKS: [JoystickId; 16] = [
 /// Contains stuff for game window.
 pub struct GlfwWindow {
     /// The window.
-    pub window: glfw::Window,
+    pub window: glfw::PWindow,
     /// Receives events from window.
     events: Receiver<(f64, glfw::WindowEvent)>,
     /// GLFW context.
@@ -69,7 +70,7 @@ pub struct GlfwWindow {
 impl GlfwWindow {
     /// Create a new game window from an existing GLFW window.
     pub fn from_pieces(
-        mut win: glfw::Window,
+        mut win: glfw::PWindow,
         glfw: glfw::Glfw,
         events: Receiver<(f64, glfw::WindowEvent)>,
         exit_on_esc: bool,
