@@ -102,6 +102,7 @@ impl GlfwWindow {
     /// Creates a new game window for GLFW.
     pub fn new(settings: &WindowSettings) -> Result<GlfwWindow, Box<dyn Error>> {
         use glfw::SwapInterval;
+        use std::ptr::null;
 
         // Initialize GLFW.
         let mut glfw = glfw::init_no_callbacks()?;
@@ -159,7 +160,9 @@ impl GlfwWindow {
         }
 
         // Load the OpenGL function pointers.
-        gl::load_with(|s| window.get_proc_address(s) as *const _);
+        gl::load_with(|s| window.get_proc_address(s)
+            .map(|n| n as *const _)
+            .unwrap_or(null()));
 
         // setup joysticks
         let mut joysticks = Vec::new();
@@ -415,7 +418,10 @@ impl AdvancedWindow for GlfwWindow {
 
 impl OpenGLWindow for GlfwWindow {
     fn get_proc_address(&mut self, proc_name: &str) -> ProcAddress {
-        self.window.get_proc_address(proc_name) as *const _
+        use std::ptr::null;
+        self.window.get_proc_address(proc_name)
+            .map(|n| n as *const _)
+            .unwrap_or(null())
     }
 
     fn is_current(&self) -> bool {
